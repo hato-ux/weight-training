@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>野球 ウェイトトレーニング メニュージェネレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0a0a0a;--white:#f0ebe0;--red:#c0392b;--red2:#e74c3c;
+  --gold:#d4a017;--gray:#181818;--gray2:#222;--gray3:#2c2c2c;
+  --muted:#666;--border:#2a2a2a;
+  --hyper:#3498db;--strength:#9b59b6;--power:#e67e22;--comp:#27ae60;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'Noto Sans JP',sans-serif;min-height:100vh;font-size:15px;-webkit-text-size-adjust:100%;}
+.wrap{max-width:940px;margin:0 auto;padding:14px 16px 30px;}
+
+/* ── header ── */
+header{text-align:center;padding:28px 0 20px;border-bottom:2px solid var(--red);margin-bottom:24px;}
+.hl{font-family:'Bebas Neue',cursive;letter-spacing:5px;color:var(--red);font-size:11px;margin-bottom:5px;}
+h1{font-family:'Bebas Neue',cursive;font-size:clamp(32px,9vw,58px);letter-spacing:3px;line-height:1.05;color:#ffffff;}
+h1 em{color:var(--red);font-style:normal;}
+.hs{margin-top:7px;font-size:11px;color:var(--muted);letter-spacing:1px;}
+
+/* ── form ── */
+.form-wrap{background:var(--gray);border:1px solid var(--border);border-top:3px solid var(--red);padding:18px 16px 22px;margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;gap:12px;}}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.flabel{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;}
+select{
+  background:var(--black);border:1px solid #3a3a3a;color:var(--white);
+  padding:13px 14px;font-size:16px;font-family:'Noto Sans JP',sans-serif;
+  outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;width:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;cursor:pointer;
+}
+select:focus{border-color:var(--red);}
+
+/* ── phase selector ── */
+.phase-wrap{margin-top:18px;}
+.phase-title{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:10px;}
+.phase-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:540px){.phase-cards{grid-template-columns:repeat(2,1fr);gap:8px;}}
+.pc{
+  border:2px solid var(--border);padding:14px 8px 12px;cursor:pointer;
+  text-align:center;transition:all .2s;position:relative;overflow:hidden;
+  background:var(--gray2);min-height:100px;
+}
+.pc:active{opacity:.8;}
+.pc.active{border-color:var(--phase-color,var(--red));background:rgba(255,255,255,.04);}
+.pc.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--phase-color,var(--red));}
+.pc-icon{font-size:20px;margin-bottom:5px;}
+.pc-name{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;margin-bottom:3px;}
+.pc-weeks{font-size:11px;color:var(--gold);}
+.pc-desc{font-size:11px;color:#999;margin-top:4px;line-height:1.45;}
+@media(max-width:360px){.pc-desc{display:none;}}
+/* phase colors */
+.pc[data-phase="hyper"]{--phase-color:var(--hyper);}
+.pc[data-phase="strength"]{--phase-color:var(--strength);}
+.pc[data-phase="power"]{--phase-color:var(--power);}
+.pc[data-phase="comp"]{--phase-color:var(--comp);}
+.pc[data-phase="hyper"].active .pc-name{color:var(--hyper);}
+.pc[data-phase="strength"].active .pc-name{color:var(--strength);}
+.pc[data-phase="power"].active .pc-name{color:var(--power);}
+.pc[data-phase="comp"].active .pc-name{color:var(--comp);}
+
+.btn{width:100%;padding:18px;background:var(--red);color:var(--white);border:none;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;cursor:pointer;margin-top:20px;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+.btn:active{background:var(--red2);}
+
+/* ── result ── */
+#result{display:none;}
+
+/* phase info banner */
+.phase-banner{
+  background:var(--gray2);border:1px solid var(--border);
+  border-left:4px solid var(--pbcolor);
+  padding:16px;margin-bottom:16px;
+}
+.pb-top{margin-bottom:12px;}
+.pb-phase{font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:3px;color:var(--pbcolor);margin-bottom:3px;}
+.pb-title{font-size:17px;font-weight:900;margin-bottom:6px;}
+.pb-desc{font-size:13px;color:#bbb;line-height:1.7;}
+.pb-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.pb-stat{background:var(--gray3);padding:10px 12px;}
+.pb-stat-label{font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px;}
+.pb-stat-val{font-family:'Bebas Neue',cursive;font-size:19px;letter-spacing:1px;color:var(--pbcolor);}
+.pb-stat-sub{font-size:11px;color:#aaa;margin-top:2px;line-height:1.4;}
+
+/* timeline */
+.timeline{display:flex;gap:0;margin-bottom:18px;overflow:hidden;border:1px solid var(--border);}
+.tl-item{flex:1;text-align:center;padding:9px 4px;font-size:10px;position:relative;cursor:default;}
+.tl-item:not(:last-child)::after{content:'▶';position:absolute;right:-5px;top:50%;transform:translateY(-50%);z-index:1;color:#444;font-size:9px;}
+.tl-hyper{background:rgba(52,152,219,.15);border-bottom:2px solid var(--hyper);}
+.tl-strength{background:rgba(155,89,182,.15);border-bottom:2px solid var(--strength);}
+.tl-power{background:rgba(230,126,34,.15);border-bottom:2px solid var(--power);}
+.tl-comp{background:rgba(39,174,96,.15);border-bottom:2px solid var(--comp);}
+.tl-active{opacity:1;}
+.tl-inactive{opacity:.35;}
+.tl-label{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;display:block;margin-bottom:1px;}
+.tl-wk{font-size:9px;color:#aaa;}
+
+/* rhead */
+.rhead{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.rtitle{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;color:var(--gold);}
+.rbadge{background:var(--red);padding:4px 10px;font-size:11px;letter-spacing:1px;font-weight:700;}
+
+/* cards */
+.card{background:var(--gray);border:1px solid var(--border);border-left:4px solid var(--gold);margin-bottom:8px;overflow:hidden;}
+.card-h{background:var(--gray2);padding:14px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;min-height:52px;}
+.card-h:active{background:var(--gray3);}
+.dbadge{background:var(--red);font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;padding:3px 10px;white-space:nowrap;}
+.dtitle{font-weight:700;font-size:14px;flex:1;line-height:1.4;}
+.dicon{color:var(--muted);font-size:16px;transition:transform .2s;flex-shrink:0;}
+.card.open .dicon{transform:rotate(180deg);}
+.card-b{display:none;padding:14px 14px 16px;}
+.card.open .card-b{display:block;}
+
+.slabel{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:7px;margin-top:14px;}
+.slabel:first-child{margin-top:0;}
+.nbox{background:rgba(212,160,23,.07);border-left:3px solid var(--gold);padding:10px 12px;font-size:13px;color:#ccc;line-height:1.75;}
+
+/* prescription box */
+.rx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px;}
+@media(max-width:480px){.rx-grid{grid-template-columns:1fr 1fr;}}
+.rx-item{background:var(--gray2);padding:9px 10px;border:1px solid var(--border);}
+.rx-item-label{font-size:9px;letter-spacing:1px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px;}
+.rx-item-val{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;color:var(--gold);}
+
+/* ── mobile-first table → カード形式 ── */
+.ex-table{width:100%;}
+/* デスクトップ：通常テーブル */
+@media(min-width:600px){
+  .ex-table{border-collapse:collapse;font-size:13px;display:table;}
+  .ex-table th{background:var(--gray2);padding:8px 10px;text-align:left;font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;display:table-cell;}
+  .ex-table td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;display:table-cell;}
+  .ex-table tr:last-child td{border-bottom:none;}
+  .ex-table td:first-child{color:var(--white);font-weight:700;}
+  .ex-table td:nth-child(2){color:#bbb;white-space:nowrap;}
+  .ex-table td:nth-child(3){color:var(--gold);white-space:nowrap;font-size:12px;}
+  .ex-table td:last-child{color:var(--muted);font-size:12px;}
+  .ex-table thead{display:table-header-group;}
+  .ex-table tbody{display:table-row-group;}
+  .ex-table tr{display:table-row;}
+  .ex-table .col-label{display:none;}
+}
+/* モバイル：カードリスト */
+@media(max-width:599px){
+  .ex-table{display:block;}
+  .ex-table thead{display:none;}
+  .ex-table tbody{display:block;}
+  .ex-table tr{display:block;background:var(--gray2);border:1px solid var(--border);border-left:3px solid var(--gold);margin-bottom:8px;padding:12px 12px 10px;}
+  .ex-table td{display:block;padding:2px 0;border:none;line-height:1.5;font-size:13px;}
+  .ex-table td:first-child{color:var(--white);font-weight:700;font-size:14px;margin-bottom:4px;}
+  .ex-table td:nth-child(2){color:#bbb;}
+  .ex-table td:nth-child(2)::before{content:'📋 ';font-size:11px;}
+  .ex-table td:nth-child(3){color:var(--gold);}
+  .ex-table td:nth-child(3)::before{content:'⚖️ ';}
+  .ex-table td:last-child{color:#999;margin-top:4px;font-size:12px;line-height:1.6;border-top:1px solid var(--border);padding-top:5px;margin-top:5px;}
+  .ex-table td:last-child::before{content:'💡 ';font-size:11px;}
+}
+
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+@media(max-width:480px){.agrid{grid-template-columns:1fr;}}
+.aitem{background:var(--gray2);padding:12px 13px;font-size:13px;line-height:1.65;color:#bbb;}
+.aitem strong{color:var(--white);display:block;margin-bottom:3px;font-size:12px;}
+
+footer{text-align:center;padding:28px 0 16px;color:var(--muted);font-size:11px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="hl">BASEBALL PERIODIZATION TRAINING</div>
+  <h1><em>WEIGHT</em> <em>TRAINING</em><br><em>GENERATOR</em></h1>
+  <p class="hs">ピリオダイゼーション対応 ／ 野球選手のための期別トレーニングメニュー</p>
+</header>
+
+<div class="form-wrap">
+  <div class="form-grid">
+    <div class="fg">
+      <div class="flabel">ポジション</div>
+      <select id="pos">
+        <option value="pitcher">投手（ピッチャー）</option>
+        <option value="catcher">捕手（キャッチャー）</option>
+        <option value="infield">内野手</option>
+        <option value="outfield">外野手</option>
+      </select>
+    </div>
+    <div class="fg">
+      <div class="flabel">トレーニング目的</div>
+      <select id="goal">
+        <option value="power">⚡ 球速・投球パワーアップ</option>
+        <option value="batting">🏏 バッティング飛距離アップ</option>
+        <option value="speed">🏃 走力・スプリント強化</option>
+        <option value="agility">🔀 守備・アジリティ強化</option>
+        <option value="injury">🛡️ 怪我予防・体幹強化</option>
+      </select>
+    </div>
+    <div class="fg">
+      <div class="flabel">週のトレーニング日数</div>
+      <select id="days">
+        <option value="2">2日 / 週</option>
+        <option value="3" selected>3日 / 週</option>
+        <option value="4">4日 / 週</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="phase-wrap">
+    <div class="phase-title">トレーニング期を選択</div>
+    <div class="phase-cards">
+      <div class="pc" data-phase="hyper" onclick="selectPhase('hyper')">
+        <div class="pc-icon">💪</div>
+        <div class="pc-name">筋肥大期</div>
+        <div class="pc-weeks">4〜6週間</div>
+        <div class="pc-desc">筋肉量を増やし<br>土台を作る期間</div>
+      </div>
+      <div class="pc" data-phase="strength" onclick="selectPhase('strength')">
+        <div class="pc-icon">🏋️</div>
+        <div class="pc-name">筋力期</div>
+        <div class="pc-weeks">4〜5週間</div>
+        <div class="pc-desc">最大筋力を<br>高める期間</div>
+      </div>
+      <div class="pc" data-phase="power" onclick="selectPhase('power')">
+        <div class="pc-icon">⚡</div>
+        <div class="pc-name">パワー期</div>
+        <div class="pc-weeks">3〜4週間</div>
+        <div class="pc-desc">筋力を爆発的な<br>スピードに変換</div>
+      </div>
+      <div class="pc" data-phase="comp" onclick="selectPhase('comp')">
+        <div class="pc-icon">⚾</div>
+        <div class="pc-name">大会期間</div>
+        <div class="pc-weeks">シーズン中</div>
+        <div class="pc-desc">状態を維持し<br>試合に備える期間</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="generate()">トレーニングメニューを生成する</button>
+</div>
+
+<!-- result -->
+<div id="result">
+
+  <!-- 年間タイムライン -->
+  <div class="timeline">
+    <div class="tl-item tl-hyper" id="tl-hyper">
+      <span class="tl-label">筋肥大期</span>
+      <span class="tl-wk">4〜6週間</span>
+    </div>
+    <div class="tl-item tl-strength" id="tl-strength">
+      <span class="tl-label">筋力期</span>
+      <span class="tl-wk">4〜5週間</span>
+    </div>
+    <div class="tl-item tl-power" id="tl-power">
+      <span class="tl-label">パワー期</span>
+      <span class="tl-wk">3〜4週間</span>
+    </div>
+    <div class="tl-item tl-comp" id="tl-comp">
+      <span class="tl-label">大会期間</span>
+      <span class="tl-wk">シーズン中</span>
+    </div>
+  </div>
+
+  <!-- phase info banner -->
+  <div class="phase-banner" id="phase-banner">
+    <div class="pb-top">
+      <div class="pb-phase" id="pb-phase-label"></div>
+      <div class="pb-title" id="pb-title"></div>
+      <div class="pb-desc" id="pb-desc"></div>
+    </div>
+    <div class="pb-stats">
+      <div class="pb-stat">
+        <div class="pb-stat-label">推奨期間</div>
+        <div class="pb-stat-val" id="pb-weeks"></div>
+        <div class="pb-stat-sub" id="pb-weeks-sub"></div>
+      </div>
+      <div class="pb-stat">
+        <div class="pb-stat-label">ディロード</div>
+        <div class="pb-stat-val" id="pb-deload"></div>
+        <div class="pb-stat-sub" id="pb-deload-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rhead">
+    <div class="rtitle">YOUR TRAINING MENU</div>
+    <div class="rbadge" id="rbadge"></div>
+  </div>
+  <div id="lnote"></div>
+  <div id="cards"></div>
+  <div style="margin-top:22px">
+    <div class="slabel">アドバイス・注意事項</div>
+    <div class="agrid" id="advice"></div>
+  </div>
+</div>
+
+<footer>野球ウェイトトレーニングジェネレーター ／ Periodization Edition</footer>
+</div>
+
+<script>// =====================================================================
+// PHASE META DATA
+// =====================================================================
+const PHASE_META = {
+  hyper: {
+    color: '#3498db',
+    label: '筋肥大期 HYPERTROPHY',
+    title: '筋肉量を増やし、土台を作る',
+    desc: '高ボリューム・中重量でのトレーニングにより筋肉量を増やす時期。この時期に作った「器」が、その後の筋力・パワーの伸びを決める。食事はカロリー余剰を意識し積極的に栄養を摂る。',
+    weeks: '4〜6週間',
+    weeksSub: 'オフシーズン序盤に実施',
+    deload: '最終週',
+    deloadSub: '重量60%・ボリューム半減で回復',
+    rx: {sets:'3〜4セット', reps:'8〜15回', load:'60〜75%1RM', rest:'60〜90秒', tempo:'コントロール重視', rir:'2〜3RIR'}
+  },
+  strength: {
+    color: '#9b59b6',
+    label: '筋力期 STRENGTH',
+    title: '最大筋力を高める',
+    desc: '低回数・高重量で神経系に強い刺激を入れ、最大筋力を引き上げる時期。筋肥大期で増えた筋肉量を「強さ」に変換する。重量の記録更新を目指して毎回の数字を記録する。',
+    weeks: '4〜5週間',
+    weeksSub: 'オフシーズン中盤に実施',
+    deload: '最終週',
+    deloadSub: '重量65%・セット数半減で神経回復',
+    rx: {sets:'4〜5セット', reps:'3〜6回', load:'80〜90%1RM', rest:'2〜4分', tempo:'挙上爆発的・下ろしゆっくり', rir:'1〜2RIR'}
+  },
+  power: {
+    color: '#e67e22',
+    label: 'パワー期 POWER',
+    title: '筋力を爆発的なスピードに変換する',
+    desc: '低〜中重量で爆発的に挙げ、「スピード×力=パワー」を最大化する時期。ハングクリーンやボックスジャンプなどプライオメトリクスを中心に組み込む。野球のパフォーマンスに最も直結する期間。',
+    weeks: '3〜4週間',
+    weeksSub: 'シーズン直前に実施',
+    deload: '最終週',
+    deloadSub: '重量55%・プライオのみ継続',
+    rx: {sets:'3〜5セット', reps:'2〜5回', load:'55〜75%1RM', rest:'2〜3分', tempo:'挙上最大速度・下ろし制御', rir:'十分な余裕を残す'}
+  },
+  comp: {
+    color: '#27ae60',
+    label: '大会期間 IN-SEASON',
+    title: '試合に向けて状態を維持・調整する',
+    desc: 'シーズン中は疲労を溜めないことが最優先。ウェイトは週2回・低ボリュームで筋力を維持する。肩ケア・体幹・下半身を中心に行い、試合のパフォーマンスを最大化する。',
+    weeks: 'シーズン全体',
+    weeksSub: '試合日程に合わせて調整',
+    deload: '試合前日・前々日',
+    deloadSub: '上半身ウェイトは行わない',
+    rx: {sets:'2〜3セット', reps:'3〜6回', load:'70〜75%1RM', rest:'2〜3分', tempo:'挙上爆発的', rir:'余裕を残す（RPE 7以下）'}
+  }
+};
+
+// =====================================================================
+// MENU DATABASE
+// 構造: DB[phase][goal][split2/split3/split4]
+// =====================================================================
+const DB = {
+
+// ══════════════════════════════════════════════
+// 筋肥大期
+// ══════════════════════════════════════════════
+hyper: {
+  power: {
+    split2:[
+      {day:'DAY 1',title:'下半身ボリューム',wu:'股関節モビリティ・バンドウォーク・動的ランジ 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','深くゆっくり下ろし、下半身全体に刺激を入れる'],['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングスの伸長を感じながらゆっくり下げる'],['ブルガリアンスプリットスクワット','3×12(各脚)','RPE7','前足荷重。後ろ足は補助のみ'],['レッグプレス','3×15','RPE7','高ボリュームで大腿四頭筋を追い込む'],['カーフレイズ','3×20','RPE7','スロー収縮。ふくらはぎを丁寧に鍛える']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身ボリューム',wu:'バンドプルアパート・Y/T/W・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','フルレンジでゆっくり下ろし、胸筋を伸展させる'],['ベントオーバーロウ','4×10','65%1RM','背中のアーチを維持。肘を後方に引き切る'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋を強調。肘45度で行う'],['ダンベルロウ（片腕）','3×12(各腕)','RPE7','大きなレンジオブモーションで広背筋に刺激'],['フェイスプル','3×15','RPE6','外旋・後引き。ローテーターカフのケア']],
+       cd:'胸・肩・広背筋ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身ボリューム',wu:'股関節モビリティ・バンドウォーク・レッグスイング 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','スロー4秒下降・1秒保持・力強く立ち上がる'],['ルーマニアンデッドリフト','3×12','65%1RM','ハムストリングスの伸長感を大切に'],['ブルガリアンスプリットスクワット','3×12(各脚)','RPE7','前足荷重で片脚に集中'],['レッグカール','3×15','RPE7','ハムをピンポイントで追い込む'],['カーフレイズ（片足）','3×15(各脚)','RPE7','スロー収縮で追い込む']],
+       cd:'クワッド・ハム・股関節 各30秒×2'},
+      {day:'DAY 2',title:'上半身プッシュボリューム',wu:'バンドプルアパート・ショルダーサークル・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','フルレンジ。胸にタッチするまで下ろす'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋を狙う。肘45度で行う'],['ダンベルショルダープレス','3×12','RPE7','肩の安定性を高める。完全伸展はしない'],['ケーブルフライ','3×15','RPE7','胸の収縮を強調。ピークコントラクション'],['トライセップスプッシュダウン','3×15','RPE7','三頭筋を徹底的に収縮させる']],
+       cd:'胸・肩・三頭筋ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身プルボリューム',wu:'バンドフェイスプル・肩甲骨活性・胸椎回旋 各90秒',
+       ex:[['デッドリフト','3×8','75%1RM','背中フラットでバーを体に沿わせる'],['ベントオーバーロウ','4×10','65%1RM','肘を体側に引きつけ、広背筋を収縮'],['懸垂','3×最大（〜12回）','体重','フルレンジ。肩甲骨を下げてから引く'],['ケーブルロウ','3×15','RPE7','肘を後方に引き切り、僧帽筋・菱形筋を収縮'],['フェイスプル','3×15','RPE6','外旋・後引き。肩のケアと後面強化を両立']],
+       cd:'広背筋・僧帽筋・肩後面 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身前面（大腿四頭筋主体）',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','スロー4秒下降。大腿四頭筋を徹底的に使う'],['レッグプレス','4×15','RPE7','高ボリューム。大腿四頭筋を追い込む'],['スプリットスクワット','3×12(各脚)','RPE7','片脚で追い込む'],['レッグエクステンション','3×15','RPE7','大腿四頭筋をアイソレートで追い込む'],['カーフレイズ','3×20','RPE7','スロー収縮']],
+       cd:'クワッド・股関節 各30秒×2'},
+      {day:'DAY 2',title:'上半身プッシュ',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','フルレンジ・スロー下降'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋'],['ダンベルショルダープレス','3×12','RPE7','肩の強化'],['ケーブルフライ','3×15','RPE7','胸のストレッチを最大化'],['トライセップスキックバック','3×15(各腕)','RPE7','三頭筋のピーク収縮']],
+       cd:'胸・肩ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'下半身後面（ハムストリングス・殿筋主体）',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×10','65%1RM','ハムのストレッチを最大化。ゆっくり下降'],['ヒップスラスト','4×12','RPE7','殿筋の最大収縮。上でしっかり絞る'],['レッグカール','3×15','RPE7','ハムをアイソレート'],['グルートキックバック（ケーブル）','3×15(各脚)','RPE7','殿筋のアイソレーション'],['カーフレイズ（片足）','3×15(各脚)','RPE7','スロー収縮']],
+       cd:'ハム・殿筋・股関節 各30秒×2'},
+      {day:'DAY 4',title:'上半身プル＋肩ケア',wu:'バンドフェイスプル・肩甲骨活性 各90秒',
+       ex:[['懸垂','4×最大（〜12回）','体重','フルレンジ・スロー下降で広背筋を追い込む'],['ベントオーバーロウ','4×10','65%1RM','肘を後方へ。収縮を意識'],['ダンベルロウ（片腕）','3×12(各腕)','RPE7','大きなROMで'],['フェイスプル','3×15','RPE6','肩後面ケア'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','外旋筋強化。肩の保護']],
+       cd:'広背筋・肩後面ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🍚 筋肥大には食事が50%',b:'カロリー余剰（体重×35〜40kcal）を目標に。たんぱく質は体重×2g以上を毎日摂取する'},
+      {t:'⏱️ レスト60〜90秒を守る',b:'休憩を短めにして代謝ストレスをかけることが筋肥大の鍵。スマホを触って休みすぎない'},
+      {t:'📈 漸進的負荷増加',b:'毎週2.5〜5kg ずつ重量を上げる。「同じ重量で1〜2回多くできた」→次回は重量アップのサイン'},
+      {t:'😴 48時間の回復',b:'同じ部位は48時間以上空けてトレーニング。筋肉は練習中ではなく、休んでいる間に成長する'}
+    ]
+  },
+  batting: {
+    split2:[
+      {day:'DAY 1',title:'下半身＆体幹ボリューム',wu:'股関節モビリティ・レッグスイング・動的ランジ 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','打撃の踏み込み・体重移動の基礎を作る'],['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングスのボリューム強化'],['ヒップスラスト','4×12','RPE7','殿筋の最大収縮。打撃の地面反力を高める'],['ケーブル水平回旋','3×15(各側)','RPE6','打撃回旋パターンのボリューム強化'],['プランク','3×60秒','体重','体幹安定の土台']],
+       cd:'股関節・ハムストリングス・体幹 各30秒×2'},
+      {day:'DAY 2',title:'上半身ボリューム',wu:'バンドプルアパート・胸椎回旋・肩甲骨活性 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','インパクトの押し込み力強化'],['ベントオーバーロウ','4×10','65%1RM','引く動作。フォロースルーの安定'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋からの出力'],['懸垂','3×最大','体重','広背筋の強化'],['フェイスプル','3×15','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身ボリューム',wu:'ヒップモビリティ・バンドウォーク・動的ランジ 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','打撃の体重移動を支える下半身の土台'],['ルーマニアンデッドリフト','3×12','65%1RM','ハムストリングスの大きなROMでの強化'],['ヒップスラスト','4×12','RPE7','殿筋の最大収縮'],['レッグプレス','3×15','RPE7','大腿四頭筋のボリューム'],['カーフレイズ','3×20','RPE7','足首の安定性']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'体幹回旋ボリューム',wu:'胸椎回旋・メディシンボール準備 各90秒',
+       ex:[['ケーブル水平回旋（打撃模倣）','4×15(各側)','RPE7','バットスイング軌道を意識した高ボリューム回旋'],['パロフプレス（全方向）','3×15(各側)','RPE6','体幹剛性の基礎を高ボリュームで作る'],['デッドリフト','3×8','75%1RM','全身後面連鎖'],['ヒップスラスト','3×12','RPE7','殿筋の追加ボリューム'],['プランク（各バリエーション）','3×60秒','体重','体幹の総合安定']],
+       cd:'体幹・殿筋 各30秒×2'},
+      {day:'DAY 3',title:'上半身ボリューム',wu:'バンドプルアパート・Y/T/W・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','インパクトの押し込み力を高ボリュームで強化'],['ベントオーバーロウ','4×10','65%1RM','フォロースルーの引き動作'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋の強化'],['懸垂','3×最大','体重','広背筋の強化'],['フェイスプル','3×15','RPE6','肩後面のケア']],
+       cd:'胸・肩・広背筋 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身前面',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','下半身の基礎ボリューム'],['レッグプレス','4×15','RPE7','大腿四頭筋の追い込み'],['スプリットスクワット','3×12(各脚)','RPE7','片脚強化'],['レッグエクステンション','3×15','RPE7','大腿四頭筋アイソレート'],['カーフレイズ','3×20','RPE7','足首の安定']],
+       cd:'クワッド・股関節 各30秒×2'},
+      {day:'DAY 2',title:'体幹回旋ボリューム',wu:'胸椎回旋・パロフプレス準備 各90秒',
+       ex:[['ケーブル水平回旋','4×15(各側)','RPE7','打撃回旋パターンの高ボリューム強化'],['デッドリフト','3×8','75%1RM','全身後面連鎖'],['ヒップスラスト','4×12','RPE7','殿筋の最大収縮'],['パロフプレス','3×15(各側)','RPE6','体幹剛性'],['プランク','3×60秒','体重','体幹安定']],
+       cd:'体幹・殿筋 各30秒×2'},
+      {day:'DAY 3',title:'上半身プッシュ',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','4×10','70%1RM','インパクトの押し込み力'],['インクラインダンベルプレス','3×12','RPE7','上部胸筋'],['ダンベルショルダープレス','3×12','RPE7','肩の安定性'],['ケーブルフライ','3×15','RPE7','胸のストレッチ'],['トライセップス系','3×15','RPE7','三頭筋強化']],
+       cd:'胸・肩ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'下半身後面＋上半身プル',wu:'股関節90/90・バンドフェイスプル 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングスの高ボリューム強化'],['ヒップスラスト','3×12','RPE7','殿筋の追加ボリューム'],['ベントオーバーロウ','4×10','65%1RM','引く動作のボリューム'],['懸垂','3×最大','体重','広背筋の強化'],['フェイスプル','3×15','RPE6','肩後面ケア']],
+       cd:'ハム・殿筋・広背筋 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏏 飛距離は下半身と体幹で決まる',b:'高ボリュームスクワット・ヒップスラスト・ケーブル回旋の3種目を最重要視する'},
+      {t:'🍽️ 積極的な食事',b:'筋肥大期は体重×35〜40kcal/日を目標に。たんぱく質は体重×2g以上、炭水化物も十分に摂る'},
+      {t:'📊 ティーバッティングで確認',b:'週に一度、ウェイトで増やした筋肉が打撃に活きているかティーバッティングで確認する'},
+      {t:'⏱️ インターバルを守る',b:'セット間は60〜90秒。代謝ストレスをかけることで筋肥大効果が高まる'}
+    ]
+  },
+  speed:{
+    split2:[
+      {day:'DAY 1',title:'下半身ボリューム（スプリント特化）',wu:'股関節モビリティ・バンドウォーク・ダイナミックランジ 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','スプリントの土台となる大腿四頭筋・殿筋のボリューム強化'],['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングスの高ボリューム強化。肉離れ予防の基礎'],['ブルガリアンスプリットスクワット','3×12(各脚)','RPE7','片脚での推進力強化'],['ヒップスラスト','3×12','RPE7','殿筋の最大収縮。走行の推進力源'],['カーフレイズ（片足）','3×15(各脚)','RPE7','ふくらはぎのボリューム強化']],
+       cd:'ハム・殿筋・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'後面連鎖＋体幹ボリューム',wu:'動的ストレッチ全般 2分',
+       ex:[['デッドリフト','4×8','70%1RM','全身後面連鎖の高ボリューム強化'],['シングルレッグRDL','3×12(各脚)','RPE6','片脚の安定性と後面の偏心強化'],['ノルディックカール','3×10','体重','ハムストリングスの偏心強化。肉離れ予防'],['プランク（各バリエーション）','3×60秒','体重','走行中の体幹安定の基礎'],['パロフプレス','3×15(各側)','RPE6','体幹抗回旋のボリューム強化']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身ボリューム（前面）',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','スプリントの土台。大腿四頭筋に集中'],['レッグプレス','4×15','RPE7','高ボリュームで大腿四頭筋を追い込む'],['スプリットスクワット','3×12(各脚)','RPE7','片脚の安定性'],['カーフレイズ','3×20','RPE7','推進力の最終出力を支えるふくらはぎ'],['レッグエクステンション','3×15','RPE7','大腿四頭筋のアイソレート']],
+       cd:'クワッド・股関節 各30秒×2'},
+      {day:'DAY 2',title:'下半身ボリューム（後面）',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングスの高ボリューム。肉離れ予防の基礎'],['ヒップスラスト','4×12','RPE7','殿筋の最大収縮。走行の推進力'],['ノルディックカール','3×10','体重','ハムストリングスの偏心強化'],['レッグカール','3×15','RPE7','ハムのアイソレート'],['シングルレッグRDL','3×10(各脚)','RPE6','片脚安定性']],
+       cd:'ハム・殿筋・股関節 各30秒×2'},
+      {day:'DAY 3',title:'体幹＋全身ボリューム',wu:'動的ストレッチ全般 2分',
+       ex:[['デッドリフト','4×8','70%1RM','全身後面連鎖の高ボリューム強化'],['プランク（全バリエーション）','3×60秒','体重','体幹の安定性を高ボリュームで'],['パロフプレス','3×15(各側)','RPE6','体幹抗回旋のボリューム'],['懸垂','3×最大','体重','腕振り動作の強化'],['カーフレイズ片足（重め）','3×15(各脚)','RPE7','足首の高ボリューム強化']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身前面ボリューム',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','スプリントの土台作り'],['レッグプレス','4×15','RPE7','高ボリューム追い込み'],['スプリットスクワット','3×12(各脚)','RPE7','片脚安定'],['レッグエクステンション','3×15','RPE7','アイソレート'],['カーフレイズ','3×20','RPE7','推進力の出口強化']],
+       cd:'クワッド・股関節 各30秒×2'},
+      {day:'DAY 2',title:'下半身後面ボリューム',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×10','65%1RM','ハムストリングス高ボリューム'],['ヒップスラスト','4×12','RPE7','殿筋最大収縮'],['ノルディックカール','3×10','体重','偏心強化・肉離れ予防'],['レッグカール','3×15','RPE7','ハムアイソレート'],['シングルレッグRDL','3×10(各脚)','RPE6','片脚安定']],
+       cd:'ハム・殿筋 各30秒×2'},
+      {day:'DAY 3',title:'体幹ボリューム',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドリフト','4×8','70%1RM','後面連鎖ボリューム'],['プランク（各バリエーション）','4×60秒','体重','体幹の高ボリューム強化'],['パロフプレス','3×15(各側)','RPE6','体幹抗回旋'],['サイドプランク','3×45秒(各側)','体重','側面体幹'],['バードドッグ（加重）','3×12(各側)','軽ダンベル','体幹安定向上']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 4',title:'補助＋上半身',wu:'バンドプルアパート 各90秒',
+       ex:[['懸垂','4×最大','体重','腕振り・上半身強化'],['ベントオーバーロウ','3×10','65%1RM','背中の強化'],['カーフレイズ片足','3×15(各脚)','RPE7','最終出力を支えるふくらはぎ'],['フェイスプル','3×15','RPE6','肩後面ケア'],['プランク','3×60秒','体重','体幹追加ボリューム']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏃 筋肥大期の走力強化は土台作り',b:'この期間は直接スプリントより筋肉量の増加が目的。スクワット・ルーマニアンデッドリフト・ノルディックカールの3種目を最重視'},
+      {t:'🥩 ハムストリングスを大切に',b:'肉離れ予防のためノルディックカールは必ず実施。痛みが出たら即中止し、専門家に相談する'},
+      {t:'🍚 炭水化物を十分摂る',b:'走力強化にはエネルギーが必要。炭水化物を制限しすぎると筋肥大が止まり逆効果になる'},
+      {t:'📊 週1回の20mダッシュで変化を確認',b:'ウェイトの成果が走力に繋がっているか週1回タイム計測で確認する'}
+    ]
+  },
+  agility:{
+    split2:[
+      {day:'DAY 1',title:'下半身・側方筋ボリューム',wu:'ラダードリル・バンドウォーク・動的ランジ 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','低重心守備姿勢の土台を高ボリュームで作る'],['ブルガリアンスプリットスクワット','3×12(各脚)','RPE7','片脚の安定性と筋量増加'],['ルーマニアンデッドリフト','3×10','65%1RM','後面連鎖のボリューム強化'],['ラテラルランジ','3×12(各脚)','RPE7','内転筋・中殿筋。守備の横方向を支える'],['カーフレイズ','3×20','RPE7','足首の安定性強化']],
+       cd:'股関節・大腿四頭筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋上半身ボリューム',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['デッドリフト','4×8','70%1RM','守備動作を支える全身後面連鎖'],['パロフプレス（全方向）','3×15(各側)','RPE6','守備の体幹剛性を高ボリュームで強化'],['懸垂','3×最大','体重','上半身の引く力・送球動作'],['プランク','3×60秒','体重','体幹安定の基礎'],['フェイスプル','3×15','RPE6','肩後面のケアと強化']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身側方ボリューム',wu:'ラダードリル・バンドウォーク・レッグスイング 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','守備の低重心姿勢を支える基礎'],['ラテラルランジ','4×12(各脚)','RPE7','内転筋・中殿筋の高ボリューム強化'],['ブルガリアンスプリットスクワット','3×12(各脚)','RPE7','片脚安定性のボリューム'],['ヒップスラスト','3×12','RPE7','殿筋の強化'],['カーフレイズ','3×20','RPE7','足首強化']],
+       cd:'股関節・大腿四頭筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹ボリューム',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドリフト','4×8','70%1RM','守備動作の全身後面連鎖'],['パロフプレス（全方向）','4×15(各側)','RPE6','守備体幹剛性の高ボリューム強化'],['プランク（各バリエーション）','4×60秒','体重','体幹安定の高ボリューム'],['サイドプランク','3×45秒(各側)','体重','側面体幹'],['デッドバグ','3×12(各側)','体重','腰椎安定']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'上半身＋後面連鎖ボリューム',wu:'バンドプルアパート・Y/T/W 各90秒',
+       ex:[['懸垂','4×最大','体重','広背筋の高ボリューム強化'],['ベントオーバーロウ','4×10','65%1RM','背中の引く動作'],['ルーマニアンデッドリフト','3×10','65%1RM','後面連鎖のボリューム'],['フェイスプル','3×15','RPE6','肩後面ケア'],['ケーブル対角チョップ','3×15(各側)','RPE6','守備複合動作の基礎']],
+       cd:'広背筋・肩後面ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身前面・側方',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['バックスクワット','4×10','70%1RM','守備低重心姿勢の土台'],['ラテラルランジ','4×12(各脚)','RPE7','横方向の筋量増加'],['レッグプレス','3×15','RPE7','大腿四頭筋ボリューム'],['スプリットスクワット','3×12(各脚)','RPE7','片脚安定'],['カーフレイズ','3×20','RPE7','足首強化']],
+       cd:'大腿四頭筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹高ボリューム',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドリフト','4×8','70%1RM','後面連鎖ボリューム'],['パロフプレス（全方向）','4×15(各側)','RPE6','体幹剛性高ボリューム'],['プランク（全バリエーション）','4×60秒','体重','体幹ボリューム'],['サイドプランクリフト','3×12(各側)','体重','側面体幹動的'],['デッドバグ（加重）','3×12(各側)','軽ダンベル','体幹安定向上']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'下半身後面ボリューム',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×10','65%1RM','後面連鎖ボリューム'],['ヒップスラスト','4×12','RPE7','殿筋最大収縮'],['ノルディックカール','3×10','体重','偏心強化・怪我予防'],['シングルレッグRDL','3×10(各脚)','RPE6','片脚安定'],['レッグカール','3×15','RPE7','ハムアイソレート']],
+       cd:'ハム・殿筋ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'上半身ボリューム',wu:'バンドプルアパート・Y/T/W 各90秒',
+       ex:[['懸垂','4×最大','体重','広背筋高ボリューム'],['ベントオーバーロウ','4×10','65%1RM','背中ボリューム'],['フェイスプル','3×15','RPE6','肩後面ケア'],['ケーブル対角チョップ','3×15(各側)','RPE6','守備複合動作基礎'],['プランク','3×60秒','体重','体幹追加']],
+       cd:'広背筋・肩後面 各30秒×2'}
+    ],
+    adv:[
+      {t:'↔️ 守備の筋肥大は横方向',b:'ラテラルランジと中殿筋の強化を優先。守備の横方向の動きは縦方向とは違う筋群が必要'},
+      {t:'🏗️ 体幹の土台作り最重要',b:'この期間に高ボリュームのパロフプレス・プランクをやりきることで、後の期間の体幹安定性が段違いになる'},
+      {t:'🍽️ 食事量を確保する',b:'守備強化のために体重増加は不要だが、筋量増加には必要なカロリー・たんぱく質を確保する'},
+      {t:'📹 動画でフォームチェック',b:'週1回はトレーニングを動画で確認。代償動作（痛みを避けた変な動き）が入っていないか確認する'}
+    ]
+  },
+  injury:{
+    split2:[
+      {day:'DAY 1',title:'下半身安定ボリューム',wu:'股関節90/90・バンドクラムシェル・バンドウォーク 各90秒',
+       ex:[['ゴブレットスクワット','4×12','RPE6','股関節モビリティと体幹安定を高ボリュームで'],['シングルレッグRDL','3×12(各脚)','RPE6','後面連鎖の偏心制御を高ボリュームで強化'],['ラテラルバンドウォーク','4×15(各方向)','軽バンド','中殿筋の高ボリューム活性化'],['ヒップスラスト','3×15','RPE6','殿筋のボリューム強化'],['ターミナルニーエクステンション','3×15(各脚)','軽バンド','VMOの強化。膝安定の土台']],
+       cd:'梨状筋・腸腰筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋肩ケアボリューム',wu:'Y/T/W・バンドプルアパート・デッドバグ 各90秒',
+       ex:[['デッドバグ','4×12(各側)','体重','高ボリュームで腰椎安定の基礎を作る'],['パロフプレス（全方向）','3×15(各側)','RPE6','体幹抗回旋の高ボリューム強化'],['Y/T/Wレイズ','4×12','極軽量','肩甲骨周囲筋の高ボリューム活性化'],['フェイスプル','4×15','RPE6','肩後面の高ボリューム強化'],['バンドEXターナルローテーション','4×15(各腕)','軽バンド','外旋筋の高ボリューム強化']],
+       cd:'肩後面・体幹全般 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身安定ボリューム',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['ゴブレットスクワット','4×12','RPE6','高ボリュームで股関節・体幹安定の基礎'],['シングルレッグRDL','4×12(各脚)','RPE6','後面偏心制御の高ボリューム'],['ラテラルバンドウォーク','4×15(各方向)','軽バンド','中殿筋の高ボリューム活性化'],['ヒップスラスト','3×15','RPE6','殿筋ボリューム'],['カーフレイズ片足','3×15(各脚)','RPE6','足首強化']],
+       cd:'梨状筋・腸腰筋・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹ボリューム',wu:'デッドバグ・バードドッグ・ブレーシング 各90秒',
+       ex:[['デッドバグ（各バリエーション）','4×12(各側)','体重','高ボリュームで腰椎安定の基礎を固める'],['パロフプレス（全方向）','4×15(各側)','RPE6','体幹剛性の高ボリューム強化'],['プランク（各バリエーション）','4×60秒','体重','体幹全般の高ボリューム安定'],['バードドッグ','4×12(各側)','体重','体幹抗回旋を高ボリュームで'],['サイドプランク','3×45秒(各側)','体重','側面体幹のボリューム']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨・ローテーターカフボリューム',wu:'Y/T/W・バンドプルアパート・フォームローラー 各90秒',
+       ex:[['Y/T/Wレイズ','4×12','極軽量','肩甲骨周囲筋の高ボリューム活性化'],['バンドEXターナルローテーション','4×15(各腕)','軽バンド','外旋筋の高ボリューム強化'],['フェイスプル','4×15','RPE6','肩後面の高ボリュームケア'],['スキャプラープルアップ','3×12','体重','前鋸筋・下部僧帽筋の活性化'],['懸垂（補助あり）','3×10','補助あり','広背筋・肩甲骨安定のボリューム']],
+       cd:'肩後面・胸・広背筋 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身安定ボリューム',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['ゴブレットスクワット','4×12','RPE6','股関節・体幹安定の高ボリューム'],['ラテラルバンドウォーク','4×15(各方向)','軽バンド','中殿筋高ボリューム'],['シングルレッグRDL','4×12(各脚)','RPE6','後面偏心高ボリューム'],['ヒップスラスト','3×15','RPE6','殿筋ボリューム'],['ターミナルニーエクステンション','3×15(各脚)','軽バンド','膝安定基礎']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹高ボリューム（腰椎安定）',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドバグ（段階的バリエーション）','4×12(各側)','体重','腰椎安定の最重要種目を高ボリュームで'],['パロフプレス（全方向）','4×15(各側)','RPE6','体幹抗回旋・抗側屈の高ボリューム'],['プランク（全バリエーション）','4×60秒','体重','体幹の包括的高ボリューム'],['バードドッグ（加重）','3×12(各側)','軽ダンベル','体幹安定の難度向上'],['サイドプランクリフト','3×12(各側)','体重','側面動的安定']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨高ボリューム',wu:'Y/T/W・フォームローラー胸椎 各90秒',
+       ex:[['Y/T/Wレイズ','4×12','極軽量','肩甲骨周囲を網羅した高ボリューム'],['バンドEXターナルローテーション（全角度）','4×15(各腕)','軽バンド','外旋筋の全角度高ボリューム強化'],['フェイスプル','4×15','RPE6','肩後面の包括的高ボリュームケア'],['スキャプラープルアップ','3×12','体重','前鋸筋・下部僧帽筋'],['ゼロポジションEXターナルローテーション','3×15(各腕)','軽バンド','投球ポジションでの肩強化']],
+       cd:'肩後面・広背筋 各30秒×2'},
+      {day:'DAY 4',title:'全身統合ボリューム',wu:'動的ストレッチ全般 2分',
+       ex:[['懸垂（補助あり）','4×10','補助あり','広背筋・肩甲骨安定の高ボリューム'],['ケーブル対角チョップ（軽め）','3×15(各側)','軽負荷','全身連動性の高ボリューム基礎'],['ゴブレットスクワット','3×12','RPE6','下半身安定の追加ボリューム'],['プランク（バリエーション）','3×60秒','体重','体幹ボリューム追加'],['フェイスプル','3×15','RPE5','肩ケア仕上げ']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏗️ 怪我予防の土台を今作る',b:'この時期に高ボリュームで肩・股関節・体幹の安定性を固めることでシーズン中の怪我リスクが激減する'},
+      {t:'⚠️ 痛みは絶対に無視しない',b:'違和感や痛みが続く場合は必ず専門家（理学療法士・スポーツドクター）に診てもらう'},
+      {t:'🔄 フォームローラーを毎日',b:'胸椎・広背筋・殿筋を毎日3〜5分ほぐすことで可動域が広がり怪我リスクが下がる'},
+      {t:'😴 回復を最優先に',b:'怪我予防メニューは地味に見えても疲労は溜まる。睡眠・栄養を十分に確保することが最大の予防策'}
+    ]
+  }
+},
+
+// ══════════════════════════════════════════════
+// 筋力期
+// ══════════════════════════════════════════════
+strength:{
+  power:{
+    split2:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク・ダイナミックストレッチ 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','爆発的に立ち上がる。下降はゆっくり制御（3秒）'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングスの強い伸長感。バックフラット'],['ブルガリアンスプリットスクワット','4×5(各脚)','RPE8','前足荷重で片脚の最大筋力を高める'],['グルートブリッジ（加重）','3×6','RPE8','殿筋の最大収縮'],['カーフレイズ（重め）','3×8','RPE8','重めで少回数。足首の筋力強化']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身最大筋力',wu:'バンドプルアパート・Y/T/W・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','5×4','85%1RM','肩甲骨を強く寄せアーチを作る。最大の力で押す'],['デッドリフト','4×4','87.5%1RM','背中をフラットに保ちバーを体に沿わせる。最大挙上'],['懸垂（加重）','4×5','RPE8','肩甲骨を下げてから引く。最大収縮'],['ダンベルショルダープレス（重め）','3×6','RPE8','肩の最大筋力強化'],['フェイスプル','3×12','RPE6','強度を保ちながら肩後面をケア']],
+       cd:'胸・肩・広背筋ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','重量記録を目指す。下降3秒・立ち上がり爆発的'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングスの最大筋力強化'],['フロントスクワット','3×4','80%1RM','体幹剛性と下半身筋力の同時強化'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚最大筋力'],['ノルディックカール','3×8','体重','ハムストリングスの偏心強化']],
+       cd:'ハムストリングス・クワッド・股関節 各30秒×2'},
+      {day:'DAY 2',title:'上半身プッシュ最大筋力',wu:'バンドプルアパート・ショルダーサークル 各90秒',
+       ex:[['ベンチプレス','5×4','85%1RM','最大重量で押す力の神経系を強化'],['インクラインダンベルプレス','4×5','RPE8','上部胸筋の最大筋力強化'],['ダンベルショルダープレス','4×5','RPE8','肩の最大筋力'],['ディップス（加重）','3×5','RPE8','胸・三頭筋の複合最大筋力'],['フェイスプル','3×12','RPE6','ローテーターカフのケア']],
+       cd:'胸・肩・三頭筋ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身プル＋後面最大筋力',wu:'バンドフェイスプル・肩甲骨活性 各90秒',
+       ex:[['デッドリフト','4×4','87.5%1RM','全身後面連鎖の最大筋力。背中フラット厳守'],['ベントオーバーロウ（重め）','4×5','80%1RM','重量重視。背中のアーチを保ちながら引く'],['懸垂（加重）','4×5','RPE8','最大収縮を意識。広背筋の神経系強化'],['バーベルシュラッグ','3×6','RPE8','僧帽筋の最大筋力強化'],['フェイスプル','3×12','RPE6','肩後面のケアを忘れない']],
+       cd:'広背筋・僧帽筋・肩後面 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身最大筋力（スクワット中心）',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85〜90%1RM','神経系に最大刺激。毎回重量記録を狙う'],['フロントスクワット','4×4','80%1RM','体幹剛性と下半身最大筋力の同時強化'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚最大筋力'],['ノルディックカール','3×8','体重','ハムストリングス偏心強化'],['カーフレイズ（重め）','3×8','RPE8','足首の最大筋力強化']],
+       cd:'クワッド・ハム・股関節 各30秒×2'},
+      {day:'DAY 2',title:'上半身プッシュ最大筋力',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','5×4','85〜90%1RM','上半身最大プッシュ筋力'],['インクラインダンベルプレス','4×5','RPE8','上部胸筋最大筋力'],['ダンベルショルダープレス','4×5','RPE8','肩の最大筋力'],['ディップス（加重）','3×5','RPE8','胸・三頭筋最大筋力'],['トライセップスプッシュダウン（重め）','3×8','RPE8','三頭筋の最大筋力']],
+       cd:'胸・肩ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'下半身最大筋力（デッドリフト中心）',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['デッドリフト','5×4','85〜90%1RM','後面連鎖の最大筋力'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングスの最大筋力'],['ヒップスラスト（加重）','4×5','RPE8','殿筋の最大筋力強化'],['レッグカール（重め）','3×8','RPE8','ハムのアイソレート最大筋力'],['シングルレッグRDL','3×6(各脚)','RPE8','片脚後面の最大筋力']],
+       cd:'ハム・殿筋ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'上半身プル最大筋力',wu:'バンドフェイスプル・肩甲骨活性 各90秒',
+       ex:[['ベントオーバーロウ（重め）','5×4','80〜85%1RM','背中の最大プル筋力'],['懸垂（加重）','4×5','RPE8','広背筋の最大筋力'],['バーベルシュラッグ','3×6','RPE8','僧帽筋の最大筋力'],['ケーブルロウ（重め）','3×6','RPE8','ミッドバックの最大筋力'],['フェイスプル','3×12','RPE6','肩後面のケアを継続']],
+       cd:'広背筋・肩後面 各30秒×2'}
+    ],
+    adv:[
+      {t:'📈 毎回重量記録を狙う',b:'この期間は「同じ重量で慣れる」ではなく「毎週2.5〜5kg重量アップ」を目標にする'},
+      {t:'⏱️ 十分なインターバルが必須',b:'セット間は2〜4分休む。不十分な回復で次のセットをすると怪我と筋力低下を招く'},
+      {t:'🛡️ フォームを絶対に崩さない',b:'重量が上がるにつれフォームが崩れやすくなる。崩れたら即重量を落とす。怪我は一瞬'},
+      {t:'😴 回復が筋力アップの条件',b:'筋力期は中枢神経系への負担が大きい。睡眠8時間以上・練習日と休養日のメリハリをつける'}
+    ]
+  },
+  batting:{
+    split2:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','打撃の体重移動・踏み込みの最大筋力を高める'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングス・殿筋の最大筋力'],['ヒップスラスト（加重）','4×5','RPE8','殿筋の最大収縮。地面反力の最大化'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','踏み込み片脚の最大筋力'],['カーフレイズ（重め）','3×8','RPE8','推進力の出口強化']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'上半身＆回旋最大筋力',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','5×4','85%1RM','インパクトの押し込み最大筋力'],['ベントオーバーロウ（重め）','4×5','80%1RM','引く動作の最大筋力'],['懸垂（加重）','4×5','RPE8','広背筋の最大筋力'],['ケーブル水平回旋（重め）','4×6(各側)','RPE8','打撃回旋の最大筋力強化'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','打撃下半身の最大筋力'],['デッドリフト','4×4','87.5%1RM','全身後面連鎖の最大筋力'],['ヒップスラスト（加重）','4×5','RPE8','殿筋最大収縮'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚踏み込み最大筋力'],['ノルディックカール','3×8','体重','ハムストリングス偏心強化']],
+       cd:'ハム・殿筋・股関節 各30秒×2'},
+      {day:'DAY 2',title:'体幹回旋最大筋力',wu:'胸椎回旋・パロフプレス準備 各90秒',
+       ex:[['ケーブル水平回旋（重め）','4×6(各側)','RPE8','打撃回旋の最大筋力強化'],['デッドリフト（補足）','3×4','87.5%1RM','全身後面の補足'],['パロフプレス（重め）','4×8(各側)','RPE8','体幹剛性の最大強化'],['ヒップスラスト（追加）','3×5','RPE8','殿筋最大収縮追加'],['プランク（RKC）','3×30秒','体重','最大腹圧']],
+       cd:'体幹・殿筋 各30秒×2'},
+      {day:'DAY 3',title:'上半身最大筋力',wu:'バンドプルアパート・Y/T/W 各90秒',
+       ex:[['ベンチプレス','5×4','85%1RM','インパクト押し込み最大筋力'],['ベントオーバーロウ（重め）','4×5','80%1RM','引く動作の最大筋力'],['懸垂（加重）','4×5','RPE8','広背筋最大筋力'],['ダンベルショルダープレス（重め）','3×6','RPE8','肩の最大筋力'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'胸・肩・広背筋 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','打撃下半身最大筋力'],['デッドリフト','4×4','87.5%1RM','後面連鎖最大筋力'],['ヒップスラスト（加重）','4×5','RPE8','殿筋最大収縮'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','踏み込み最大筋力'],['ノルディックカール','3×8','体重','ハム偏心強化']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'上半身プッシュ最大筋力',wu:'バンドプルアパート・胸椎回旋 各90秒',
+       ex:[['ベンチプレス','5×4','85%1RM','インパクト最大押し込み力'],['インクラインダンベルプレス','4×5','RPE8','上部胸筋最大筋力'],['ダンベルショルダープレス（重め）','4×5','RPE8','肩最大筋力'],['ディップス（加重）','3×5','RPE8','胸・三頭筋最大'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'胸・肩ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'回旋最大筋力',wu:'胸椎回旋・パロフプレス準備 各90秒',
+       ex:[['ケーブル水平回旋（重め）','4×6(各側)','RPE8','打撃回旋の最大筋力'],['デッドリフト','3×4','87.5%1RM','後面連鎖補足'],['パロフプレス（重め）','4×8(各側)','RPE8','体幹剛性最大化'],['ヒップスラスト（加重）','3×5','RPE8','殿筋追加'],['プランク（RKC）','3×30秒','体重','最大腹圧']],
+       cd:'体幹・殿筋 各30秒×2'},
+      {day:'DAY 4',title:'上半身プル最大筋力',wu:'バンドフェイスプル・肩甲骨活性 各90秒',
+       ex:[['ベントオーバーロウ（重め）','5×4','80%1RM','引く動作最大筋力'],['懸垂（加重）','4×5','RPE8','広背筋最大筋力'],['ケーブルロウ（重め）','3×6','RPE8','ミッドバック最大筋力'],['バーベルシュラッグ','3×6','RPE8','僧帽筋最大筋力'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'広背筋・肩後面 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏏 回旋の「重さ」が飛距離に変わる',b:'この時期にケーブル回旋の最大重量を更新することで、パワー期に爆発的なバットスピードに変換される'},
+      {t:'📈 毎週重量を更新する',b:'スクワット・ベンチ・デッドリフトの重量記録を毎週更新することが飛距離アップへの最短距離'},
+      {t:'⏱️ インターバル2〜4分は必須',b:'不十分な休憩は筋力向上を妨げる。秒数を計ってしっかり休む'},
+      {t:'🛡️ フォームが崩れたら即重量ダウン',b:'高重量でフォームが崩れると怪我の原因になる。フォームありきで重量を選ぶ'}
+    ]
+  },
+  speed:{
+    split2:[
+      {day:'DAY 1',title:'下半身最大筋力（スプリント基盤）',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','スプリントの推進力を最大化する下半身最大筋力'],['ハングパワークリーン','4×4','75%1RM','スプリントの爆発力への架け橋種目'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングスの最大筋力'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚推進力の最大筋力'],['ノルディックカール','3×8','体重','肉離れ予防の偏心強化']],
+       cd:'ハム・殿筋・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'後面連鎖＋体幹最大筋力',wu:'動的ストレッチ全般 2分',
+       ex:[['デッドリフト','5×4','87.5%1RM','走行を支える全身後面連鎖の最大筋力'],['ヒップスラスト（加重）','4×5','RPE8','殿筋の最大収縮。走行推進力の最大化'],['シングルレッグRDL（重め）','3×6(各脚)','RPE8','片脚着地安定の最大筋力'],['プランク（RKC）','3×30秒','体重','走行中の体幹剛性の最大化'],['カーフレイズ（重め）','3×8','RPE8','推進力の最終出力強化']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','スプリット推進力の最大筋力'],['デッドリフト','4×4','87.5%1RM','後面連鎖最大筋力'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚推進力'],['ノルディックカール','3×8','体重','ハム偏心強化'],['カーフレイズ（重め）','3×8','RPE8','足首最大筋力']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'ハングクリーン＋爆発的筋力',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×4','75%1RM','筋力をパワーへ変換する架け橋種目'],['ヒップスラスト（加重）','4×5','RPE8','殿筋の最大収縮'],['シングルレッグRDL（重め）','3×6(各脚)','RPE8','片脚安定最大筋力'],['プランク','3×60秒','体重','体幹剛性の強化'],['パロフプレス（重め）','3×8(各側)','RPE8','体幹抗回旋最大化']],
+       cd:'全身ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'補助＋体幹最大筋力',wu:'バンドプルアパート 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングス最大筋力'],['懸垂（加重）','4×5','RPE8','腕振り・上半身最大筋力'],['プランク（RKC）','3×30秒','体重','最大腹圧'],['ノルディックカール','3×8','体重','ハム偏心追加'],['カーフレイズ片足（重め）','3×8(各脚)','RPE8','推進力最終出口']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身最大筋力（スクワット）',wu:'股関節モビリティ・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','スプリント推進力最大筋力'],['フロントスクワット','4×4','80%1RM','体幹剛性と下半身最大筋力'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚最大筋力'],['カーフレイズ（重め）','3×8','RPE8','足首強化'],['ノルディックカール','3×8','体重','ハム偏心強化']],
+       cd:'クワッド・ハム・股関節 各30秒×2'},
+      {day:'DAY 2',title:'ハングクリーン＋爆発的',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×4','75%1RM','架け橋種目。最大速度で挙げる'],['ヒップスラスト（加重）','4×5','RPE8','殿筋最大収縮'],['シングルレッグRDL（重め）','3×6(各脚)','RPE8','片脚後面最大筋力'],['プランク（各バリエーション）','3×60秒','体重','体幹剛性'],['パロフプレス（重め）','3×8(各側)','RPE8','体幹抗回旋最大化']],
+       cd:'全身ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'後面連鎖最大筋力（デッドリフト）',wu:'股関節90/90・レッグスイング 各90秒',
+       ex:[['デッドリフト','5×4','87.5%1RM','後面連鎖最大筋力'],['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングス最大筋力'],['ヒップスラスト（追加）','3×5','RPE8','殿筋追加'],['レッグカール（重め）','3×8','RPE8','ハムアイソレート最大筋力'],['シングルレッグカーフレイズ（重め）','3×8(各脚)','RPE8','推進力出口']],
+       cd:'ハム・殿筋 各30秒×2'},
+      {day:'DAY 4',title:'体幹＋上半身最大筋力',wu:'バンドプルアパート 各90秒',
+       ex:[['懸垂（加重）','4×5','RPE8','上半身最大筋力'],['ベントオーバーロウ（重め）','4×5','80%1RM','背中最大筋力'],['プランク（RKC）','3×30秒','体重','最大腹圧'],['ノルディックカール（追加）','3×8','体重','肉離れ予防'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'⚡ 筋力期のスプリント強化は「土台」',b:'この時期のスクワット・デッドリフト・クリーンの最大重量更新が、パワー期の爆発的加速に直結する'},
+      {t:'🏃 肉離れ防止を絶対に忘れない',b:'重量が上がるにつれノルディックカールが最重要になる。痛みが出たら即専門家に相談'},
+      {t:'⏱️ セット間2〜4分厳守',b:'神経系の完全回復がなければ筋力向上はない。インターバルを削るのは最もコスパが悪い行為'},
+      {t:'📊 タイム計測と連動',b:'筋力期終盤に20mダッシュを計測し、ウェイトの重量アップが走力に変わっているか確認する'}
+    ]
+  },
+  agility:{
+    split2:[
+      {day:'DAY 1',title:'下半身・側方最大筋力',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','守備の低重心姿勢を支える最大筋力'],['ラテラルランジ（重め）','4×5(各脚)','RPE8','横方向の最大筋力強化'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚の最大筋力'],['ルーマニアンデッドリフト','3×5','80%1RM','後面連鎖の最大筋力'],['ノルディックカール','3×8','体重','肉離れ予防の偏心強化']],
+       cd:'股関節・大腿四頭筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋上半身最大筋力',wu:'デッドバグ・バンドプルアパート 各90秒',
+       ex:[['デッドリフト','5×4','87.5%1RM','守備動作の全身後面連鎖最大筋力'],['パロフプレス（重め）','4×8(各側)','RPE8','体幹剛性の最大強化'],['懸垂（加重）','4×5','RPE8','送球・守備動作の上半身最大筋力'],['プランク（RKC）','3×30秒','体重','最大腹圧'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身・側方最大筋力',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','守備低重心の最大筋力'],['ラテラルランジ（重め）','4×5(各脚)','RPE8','横方向最大筋力'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚最大筋力'],['ルーマニアンデッドリフト','3×5','80%1RM','後面最大筋力'],['ノルディックカール','3×8','体重','偏心強化']],
+       cd:'大腿四頭筋・内転筋・ハム 各30秒×2'},
+      {day:'DAY 2',title:'体幹最大筋力',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドリフト','5×4','87.5%1RM','後面連鎖最大筋力'],['パロフプレス（重め）','4×8(各側)','RPE8','体幹剛性最大化'],['プランク（RKC）','3×30秒','体重','最大腹圧'],['ヒップスラスト（加重）','4×5','RPE8','殿筋最大収縮'],['サイドプランク（加重）','3×30秒(各側)','軽ダンベル','側面体幹最大筋力']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'上半身最大筋力',wu:'バンドプルアパート・Y/T/W 各90秒',
+       ex:[['懸垂（加重）','4×5','RPE8','広背筋・送球動作最大筋力'],['ベントオーバーロウ（重め）','4×5','80%1RM','背中引く動作最大筋力'],['ケーブル対角チョップ（重め）','3×6(各側)','RPE8','守備複合動作最大筋力'],['フェイスプル','3×12','RPE6','肩後面ケア'],['バンドEXターナルローテーション','3×12(各腕)','中バンド','外旋筋最大筋力']],
+       cd:'広背筋・肩後面 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身最大筋力',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['バックスクワット','5×4','85%1RM','守備低重心最大筋力'],['ラテラルランジ（重め）','4×5(各脚)','RPE8','横方向最大筋力'],['ブルガリアンスプリットスクワット','3×5(各脚)','RPE8','片脚最大筋力'],['ノルディックカール','3×8','体重','偏心強化'],['カーフレイズ（重め）','3×8','RPE8','足首強化']],
+       cd:'大腿四頭筋・内転筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹最大筋力',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドリフト','5×4','87.5%1RM','後面連鎖最大筋力'],['パロフプレス（重め）','4×8(各側)','RPE8','体幹剛性最大化'],['プランク（RKC）','3×30秒','体重','最大腹圧'],['ヒップスラスト（加重）','4×5','RPE8','殿筋最大収縮'],['サイドプランク（加重）','3×30秒(各側)','軽ダンベル','側面体幹最大']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'後面連鎖最大筋力',wu:'股関節90/90 各90秒',
+       ex:[['ルーマニアンデッドリフト','4×5','80%1RM','ハムストリングス最大筋力'],['ヒップスラスト（加重）追加','3×5','RPE8','殿筋追加'],['レッグカール（重め）','3×8','RPE8','ハムアイソレート'],['シングルレッグRDL（重め）','3×6(各脚)','RPE8','片脚後面最大'],['ターミナルニーエクステンション（重め）','3×12(各脚)','中バンド','膝安定最大']],
+       cd:'ハム・殿筋 各30秒×2'},
+      {day:'DAY 4',title:'上半身最大筋力',wu:'バンドフェイスプル・Y/T/W 各90秒',
+       ex:[['懸垂（加重）','4×5','RPE8','広背筋最大筋力'],['ベントオーバーロウ（重め）','4×5','80%1RM','引く動作最大筋力'],['ケーブル対角チョップ（重め）','3×6(各側)','RPE8','守備複合動作最大筋力'],['バーベルシュラッグ','3×6','RPE8','僧帽筋最大筋力'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'広背筋・肩後面 各30秒×2'}
+    ],
+    adv:[
+      {t:'↔️ ラテラルランジを最重視',b:'横方向の最大筋力強化が守備強化の核心。この種目の重量更新が守備範囲の拡大に直結する'},
+      {t:'🛡️ 足首・膝の保護を忘れずに',b:'高重量の急激な方向転換動作は膝・足首への負担が大きい。テーピングと十分なウォームアップを徹底'},
+      {t:'⏱️ 2〜4分のインターバル厳守',b:'神経系の最大筋力強化には完全回復が必須。インターバルを削ると神経系の強化が止まる'},
+      {t:'📹 動画でフォームチェック',b:'高重量での代償動作は怪我の原因。月2回は動画でフォームを確認する'}
+    ]
+  },
+  injury:{
+    split2:[
+      {day:'DAY 1',title:'下半身安定最大筋力',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['ゴブレットスクワット（重め）','4×8','RPE7〜8','重量を上げながら股関節安定と体幹安定を維持'],['シングルレッグRDL（重め）','4×8(各脚)','RPE7〜8','後面偏心強化。フォームを崩さない範囲で重量アップ'],['ラテラルバンドウォーク（強バンド）','4×15(各方向)','強バンド','中殿筋の最大筋力に近い強度での強化'],['ヒップスラスト（加重）','4×8','RPE7〜8','殿筋の高強度収縮'],['ターミナルニーエクステンション（強バンド）','3×12(各脚)','強バンド','VMOの高強度強化']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋肩最大筋力',wu:'Y/T/W・バンドプルアパート・デッドバグ 各90秒',
+       ex:[['デッドバグ（加重バリエーション）','4×10(各側)','軽ダンベル','腰椎安定を保ちながら負荷を上げる'],['パロフプレス（重め）','4×10(各側)','RPE7〜8','体幹剛性の最大強化'],['Y/T/Wレイズ（重め）','4×10','軽〜中ダンベル','肩甲骨周囲筋の高強度強化'],['フェイスプル（重め）','4×12','RPE7','肩後面の高強度強化'],['バンドEXターナルローテーション（強め）','4×12(各腕)','中バンド','外旋筋の高強度強化']],
+       cd:'肩後面・体幹全般 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身安定最大筋力',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['ゴブレットスクワット（重め）','4×8','RPE7〜8','高強度で股関節安定を強化'],['シングルレッグRDL（重め）','4×8(各脚)','RPE7〜8','後面偏心の高強度強化'],['ラテラルバンドウォーク（強バンド）','4×15(各方向)','強バンド','中殿筋高強度'],['ヒップスラスト（加重）','4×8','RPE7〜8','殿筋高強度収縮'],['ターミナルニーエクステンション（強バンド）','3×12(各脚)','強バンド','VMO高強度']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹最大筋力',wu:'デッドバグ・バードドッグ・ブレーシング 各90秒',
+       ex:[['デッドバグ（加重）','4×10(各側)','軽ダンベル','腰椎安定の高強度'],['パロフプレス（重め）','4×10(各側)','RPE7〜8','体幹剛性最大強化'],['RKCプランク','4×30秒','体重','最大腹圧'],['サイドプランク（加重）','3×30秒(各側)','軽ダンベル','側面体幹高強度'],['バードドッグ（加重）','3×10(各側)','中ダンベル','体幹安定高強度']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨・ローテーターカフ最大筋力',wu:'Y/T/W・フォームローラー胸椎 各90秒',
+       ex:[['Y/T/Wレイズ（重め）','4×10','軽〜中ダンベル','肩甲骨周囲の高強度活性化'],['バンドEXターナルローテーション（強め）','4×12(各腕)','中バンド','外旋筋の高強度強化'],['フェイスプル（重め）','4×12','RPE7','肩後面の高強度強化'],['懸垂（補助あり、重くなった場合は補助減らす）','4×8','体重〜軽補助','広背筋・肩甲骨の高強度強化'],['スキャプラープルアップ','3×12','体重','前鋸筋・下部僧帽筋']],
+       cd:'肩後面・広背筋 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身安定高強度',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['ゴブレットスクワット（重め）','4×8','RPE7〜8','高強度股関節安定'],['シングルレッグRDL（重め）','4×8(各脚)','RPE7〜8','後面偏心高強度'],['ラテラルバンドウォーク（強バンド）','4×15(各方向)','強バンド','中殿筋高強度'],['ヒップスラスト（加重）','4×8','RPE7〜8','殿筋高強度'],['ターミナルニーエクステンション（強バンド）','3×12(各脚)','強バンド','VMO高強度']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹高強度',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['デッドバグ（加重）','4×10(各側)','軽ダンベル','腰椎安定高強度'],['パロフプレス（重め）','4×10(各側)','RPE7〜8','体幹剛性最大強化'],['RKCプランク','4×30秒','体重','最大腹圧'],['サイドプランク（加重）','3×30秒(各側)','軽ダンベル','側面体幹高強度'],['バードドッグ（加重）','3×10(各側)','中ダンベル','体幹高強度']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨高強度',wu:'Y/T/W・フォームローラー胸椎 各90秒',
+       ex:[['Y/T/Wレイズ（重め）','4×10','軽〜中ダンベル','肩甲骨高強度'],['バンドEXターナルローテーション（強め）','4×12(各腕)','中バンド','外旋筋高強度'],['フェイスプル（重め）','4×12','RPE7','肩後面高強度'],['懸垂（補助減少）','4×8','体重〜補助','広背筋・肩甲骨高強度'],['スキャプラープルアップ','3×12','体重','前鋸筋・下部僧帽筋']],
+       cd:'肩後面・広背筋 各30秒×2'},
+      {day:'DAY 4',title:'統合高強度',wu:'動的ストレッチ全般 2分',
+       ex:[['懸垂（体重）','4×8','体重','広背筋統合'],['ケーブル対角チョップ（中程度）','3×10(各側)','RPE7','全身連動性の高強度'],['ゴブレットスクワット（追加）','3×8','RPE7','下半身安定追加'],['RKCプランク','3×30秒','体重','最大腹圧追加'],['フェイスプル','3×12','RPE7','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'💪 怪我予防も「強度が必要」',b:'この期間は軽すぎる負荷では効果が薄い。RPE7〜8の範囲で確実に筋力強化を進める'},
+      {t:'⚠️ 痛みと筋肉痛を区別する',b:'筋肉痛（筋繊維の疲労）は正常。関節の痛み・鋭い痛み・神経痛は即中止して専門家に相談'},
+      {t:'📈 段階的な負荷増加を継続',b:'毎週少しずつ難度（重量・バンドの強さ）を上げる。停滞は筋力強化が止まっているサイン'},
+      {t:'🔄 フォームローラーは継続',b:'筋力期でも毎日フォームローラーを継続する。可動域の制限が怪我の原因になるため'}
+    ]
+  }
+},
+
+// ══════════════════════════════════════════════
+// パワー期
+// ══════════════════════════════════════════════
+power:{
+  power:{
+    split2:[
+      {day:'DAY 1',title:'下半身爆発力',wu:'股関節モビリティ・バンドウォーク・ダイナミックストレッチ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展を瞬時に発揮。バーを最大速度で挙げる'],['ボックスジャンプ','5×4','最大努力','縦方向の最大爆発力。着地は静かに'],['バックスクワット（爆発的）','4×3','70%1RM（最大速度で挙げる）','挙上を爆発的に。下降は制御して'],['ラテラルボックスジャンプ','3×4(各側)','最大努力','横方向の爆発力'],['カーフジャンプ','3×10','体重','足首の爆発的な使い方を身につける']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身爆発力＋体幹',wu:'バンドプルアパート・ショルダーサークル・胸椎回旋 各90秒',
+       ex:[['メディシンボール胸パス（壁）','4×5','3〜5kg（最大速度）','上半身の爆発的プッシュ力'],['デプスプッシュアップ','3×5','体重','上半身の爆発的な押す力'],['ベンチプレス（スピード）','4×3','55%1RM（最大速度）','神経系に爆発的挙上を学習させる'],['メディシンボール水平ロータリースロー','4×5(各側)','3〜5kg','投球・打撃の爆発的回旋力'],['フェイスプル','3×12','RPE6','肩後面ケア。パワー期でも忘れない']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身爆発力（主）',wu:'股関節モビリティ・バンドウォーク・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展の爆発力。バーを引き上げる速度を最大に'],['ボックスジャンプ','5×4','最大努力','縦方向の爆発力。床に落ちたら即座に次の跳躍'],['バックスクワット（スピード）','4×3','65〜70%1RM（最大速度）','挙上を最速で。下降3秒・挙上最大速度'],['デプスジャンプ','3×4','体重','SSCの強化。反射的な爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚の爆発的離地能力']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身爆発力',wu:'メディシンボール準備・バンドプルアパート 各90秒',
+       ex:[['メディシンボール胸パス（壁）','5×5','3〜5kg','上半身押す爆発力'],['ベンチプレス（スピード）','4×3','55%1RM','最大速度で挙上'],['メディシンボール水平ロータリースロー','5×5(各側)','3〜5kg','投球・打撃回旋の爆発力'],['デプスプッシュアップ','3×5','体重','上半身の爆発的プッシュ'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'全身連動爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['ハングスナッチ（または軽めクリーン）','4×3','60%1RM（最大速度）','全身爆発的連動の最高難度種目'],['メディシンボールスラム','4×5','5kg','上から下への爆発的出力'],['ラテラルバウンド（スケーター）','4×6(各側)','体重','横方向の爆発力'],['ジャンプスクワット','3×4','体重〜20%1RM','爆発的な立ち上がり'],['パロフプレスジャーク（爆発的）','3×6(各側)','RPE6','体幹から末端への爆発的連動']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身爆発力（ジャンプ系）',wu:'股関節モビリティ・スキップ・バンドウォーク 各90秒',
+       ex:[['ボックスジャンプ','5×5','最大努力','縦方向の最大爆発力'],['デプスジャンプ','4×4','体重','SSC強化。反射的爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発力'],['ジャンプスクワット','4×4','体重〜20%1RM','爆発的立ち上がり'],['カーフジャンプ','3×10','体重','足首の爆発的使い方']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'上半身爆発力',wu:'メディシンボール準備・バンドプルアパート 各90秒',
+       ex:[['メディシンボール胸パス（壁）','5×5','3〜5kg','上半身爆発的プッシュ'],['ベンチプレス（スピード）','4×3','55%1RM','最大速度挙上'],['メディシンボール水平ロータリースロー','5×5(各側)','3〜5kg','打撃・投球回旋爆発力'],['デプスプッシュアップ','3×5','体重','上半身爆発プッシュ'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'下半身爆発力（クリーン系）',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展爆発力の主役種目'],['ハングパワースナッチ','3×3','60%1RM（最大速度）','全身爆発的連動の最高難度'],['バックスクワット（スピード）','4×3','65%1RM（最大速度）','爆発的立ち上がり'],['ラテラルバウンド','4×6(各側)','体重','横方向爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発的離地']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 4',title:'全身連動爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボールスラム','5×5','5kg','上から下への爆発的出力'],['ジャンプスクワット','4×4','体重〜20%1RM','爆発的立ち上がり'],['メディシンボール水平スロー（追加）','3×5(各側)','3〜5kg','回旋爆発力追加'],['パロフプレスジャーク','3×6(各側)','RPE6','体幹から末端への爆発的連動'],['フェイスプル','3×12','RPE6','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'⚡ 「速さ」が全てのパワー期',b:'重量より速度が最優先。バーを最大速度で挙げること。重すぎて速度が出ない場合は即重量を下げる'},
+      {t:'🛡️ 十分なウォームアップ必須',b:'爆発的な動作は体温が低い状態で行うと怪我リスクが急増。ウォームアップに12〜15分をかける'},
+      {t:'😴 疲労管理が最重要',b:'疲れた状態では爆発力が出ない。しっかり眠り、疲労が強い日はボリュームを減らす判断も必要'},
+      {t:'⚾ グラウンドで確認する',b:'パワー期はウェイトの変化が即グラウンドに現れる時期。この時期に定期的にブルペン・ティーで感触を確認する'}
+    ]
+  },
+  batting:{
+    split2:[
+      {day:'DAY 1',title:'下半身爆発力',wu:'ヒップモビリティ・バンドウォーク・ダイナミックランジ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','打撃インパクトの爆発力に直結する三重伸展'],['ボックスジャンプ','4×4','最大努力','打撃の踏み込み爆発力を高める'],['バックスクワット（スピード）','4×3','65%1RM（最大速度）','挙上を最速で。打撃下半身の爆発力'],['ジャンプスクワット','3×4','体重〜20%1RM','爆発的立ち上がり。体重移動の瞬発力'],['ヒップスラスト（爆発的）','3×5','RPE7（爆発的）','殿筋の爆発的収縮。地面反力最大化']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身・体幹爆発力',wu:'胸椎回旋・メディシンボール準備 各90秒',
+       ex:[['メディシンボール水平ロータリースロー（壁）','5×5(各側)','3〜5kg','バットスイングと同方向の爆発的回旋'],['ベンチプレス（スピード）','4×3','55%1RM（最大速度）','インパクトの爆発的押し込み力'],['メディシンボールスラム','3×5','5kg','上から下への爆発的出力'],['デプスプッシュアップ','3×5','体重','上半身の爆発的プッシュ'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身爆発力',wu:'ヒップモビリティ・バンドウォーク・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展で打撃爆発力に直結'],['ボックスジャンプ','5×4','最大努力','縦方向の打撃爆発力'],['バックスクワット（スピード）','4×3','65%1RM','挙上最大速度'],['ジャンプスクワット','3×4','体重〜20%1RM','爆発的体重移動'],['ヒップスラスト（爆発的）','3×5','RPE7（爆発的）','地面反力最大化']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'回旋爆発力',wu:'胸椎回旋・メディシンボール準備 各90秒',
+       ex:[['メディシンボール水平ロータリースロー（壁）','5×6(各側)','3〜5kg','打撃回旋の爆発力を直接強化'],['ベンチプレス（スピード）','4×3','55%1RM（最大速度）','インパクトの爆発的押し込み'],['メディシンボールスラム','4×5','5kg','上下の爆発的出力'],['ジャンプランジ','3×4(各脚)','体重','踏み込みの爆発的切り替え'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'体幹・上半身ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'全身連動爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['ハングパワースナッチ（または軽めクリーン）','4×3','60%1RM（最大速度）','全身爆発的連動'],['デプスジャンプ','3×4','体重','SSCの強化'],['メディシンボール水平スロー（フォロー付き）','3×5(各側)','4kg','フルスイングに近い爆発的回旋'],['ラテラルバウンド','3×5(各側)','体重','方向転換の爆発力'],['スプリント20m','3×2本','最大努力','グラウンドに爆発力を転換']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身ジャンプ系爆発力',wu:'ヒップモビリティ・スキップ 各90秒',
+       ex:[['ボックスジャンプ','5×5','最大努力','縦方向最大爆発力'],['デプスジャンプ','4×4','体重','SSC強化'],['シングルレッグジャンプ','3×4(各脚)','体重','踏み込み片脚爆発力'],['ジャンプスクワット','4×4','体重〜20%1RM','体重移動爆発力'],['ジャンプランジ','3×5(各脚)','体重','踏み込み切り替え']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'回旋爆発力（メイン）',wu:'胸椎回旋・メディシンボール準備 各90秒',
+       ex:[['メディシンボール水平ロータリースロー','5×6(各側)','3〜5kg','打撃回旋の最大爆発力'],['ベンチプレス（スピード）','4×3','55%1RM（最大速度）','インパクト爆発力'],['メディシンボールスラム','4×5','5kg','上下爆発的出力'],['デプスプッシュアップ','3×5','体重','上半身爆発プッシュ'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'下半身クリーン系爆発力',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展爆発力'],['ハングパワースナッチ','3×3','60%1RM','全身爆発的連動'],['バックスクワット（スピード）','4×3','65%1RM（最大速度）','挙上最大速度'],['ラテラルバウンド','4×5(各側)','体重','横方向爆発力'],['ヒップスラスト（爆発的）','3×5','RPE7（爆発的）','殿筋爆発的収縮']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 4',title:'全身連動爆発力＋グラウンド転換',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['スプリント20m','5×2本','最大努力','グラウンドへの転換'],['メディシンボール水平スロー（最大速度）','4×5(各側)','3〜4kg','フルスイング模倣'],['ジャンプスクワット','3×4','体重〜20%1RM','体重移動爆発力'],['メディシンボールスラム','3×5','5kg','爆発的出力追加'],['フェイスプル','3×12','RPE6','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏏 メディシンボールが最重要',b:'打撃の飛距離アップに最も直結するのがメディシンボール水平ロータリースロー。毎回最大速度で行う'},
+      {t:'⚡ 速度が落ちたら即終了',b:'疲れて動作速度が落ちたセットは無意味。速度が出なくなったらそのエクサは終了する'},
+      {t:'⚾ ティーバッティングで毎週確認',b:'この期間はウェイトの変化がバットスピードに即座に現れる。週1回ティーでスイング速度を確認する'},
+      {t:'😴 睡眠は妥協しない',b:'爆発力は睡眠不足の状態では発揮できない。8時間以上の睡眠を最優先にスケジュールを組む'}
+    ]
+  },
+  speed:{
+    split2:[
+      {day:'DAY 1',title:'下半身爆発力（スプリント特化）',wu:'ダイナミックストレッチ・スキップ・股関節モビリティ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','スプリント加速力に直結する三重伸展爆発力'],['ボックスジャンプ','5×4','最大努力','縦方向の爆発力。一歩目の加速に転換'],['スプリント10m×5本','5本','最大努力','ウェイトで得た爆発力をグラウンドで確認'],['デプスジャンプ','3×4','体重','SSCの強化。反射的一歩目'],['ジャンプスクワット','3×4','体重〜20%1RM','爆発的立ち上がり']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'体幹爆発力＋上半身',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボールスラム','4×5','5kg','上から下への爆発的出力。走行の体幹剛性を高める'],['ラテラルバウンド（スケーター）','4×6(各側)','体重','横方向の爆発力。守備・走塁の方向転換'],['メディシンボール壁投げ（後方回旋）','3×5(各側)','3kg','腕振り動作の爆発的強化'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚の爆発的離地能力'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身爆発力（クリーン・ジャンプ）',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ハングパワークリーン','5×3','70%1RM（最大速度）','一歩目加速の爆発力源'],['ボックスジャンプ','5×5','最大努力','縦方向最大爆発力'],['デプスジャンプ','4×4','体重','SSC・反射的爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発力'],['カーフジャンプ','3×10','体重','足首爆発的使い方']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'スプリント特化爆発力',wu:'ジョグ・ダイナミックストレッチ・ドリル 各90秒',
+       ex:[['スプリント10〜20m','10本','最大努力','ウェイトで得た爆発力の転換。完全休憩で実施'],['ラテラルバウンド','4×6(各側)','体重','横方向爆発力'],['ジャンプスクワット','4×4','体重〜20%1RM','爆発的体重移動'],['バックスクワット（スピード）','3×3','65%1RM（最大速度）','挙上最大速度'],['ハングパワークリーン（追加）','3×3','70%1RM（最大速度）','三重伸展追加']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 3',title:'体幹爆発力＋上半身',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボールスラム','4×5','5kg','体幹から末端への爆発的出力'],['ラテラルバウンド（追加）','3×5(各側)','体重','横方向爆発力追加'],['メディシンボール壁投げ（後方）','3×5(各側)','3kg','腕振り強化'],['シングルレッグジャンプ（追加）','3×4(各脚)','体重','片脚爆発力追加'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身ジャンプ系爆発力',wu:'ダイナミックストレッチ・スキップ 各90秒',
+       ex:[['ボックスジャンプ','5×5','最大努力','縦方向最大爆発力'],['デプスジャンプ','4×5','体重','SSC強化'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発力'],['ジャンプスクワット','4×4','体重〜20%1RM','爆発的立ち上がり'],['カーフジャンプ','3×10','体重','足首爆発']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'スプリント＋クリーン爆発力',wu:'ジョグ・ダイナミックストレッチ 各90秒',
+       ex:[['スプリント10〜20m','8本','最大努力','爆発力のグラウンド転換'],['ハングパワークリーン','5×3','70%1RM（最大速度）','三重伸展爆発力'],['バックスクワット（スピード）','3×3','65%1RM（最大速度）','挙上最大速度'],['ラテラルバウンド','4×5(各側)','体重','横方向爆発力'],['デプスジャンプ（追加）','3×4','体重','SSC追加']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 3',title:'体幹爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボールスラム','5×5','5kg','体幹爆発的出力'],['ラテラルバウンド（追加）','4×5(各側)','体重','横方向追加'],['ジャンプランジ','3×5(各脚)','体重','方向転換爆発力'],['メディシンボール壁投げ','3×5(各側)','3kg','腕振り強化'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'体幹・全身ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'全身連動爆発力＋グラウンド転換',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['スプリント30m','5本','最大努力','最大距離でのグラウンド転換'],['ハングパワークリーン（追加）','3×3','70%1RM（最大速度）','三重伸展追加'],['シングルレッグジャンプ（追加）','3×4(各脚)','体重','片脚爆発力追加'],['メディシンボールスラム（追加）','3×5','5kg','体幹爆発追加'],['フェイスプル','3×12','RPE6','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏃 スプリントをウェイトに組み込む',b:'パワー期はウェイトとスプリントを同じ日に行うのが最も効果的。ウェイト後に20mダッシュを必ず実施'},
+      {t:'⚡ 速度が全て',b:'この期間は「重さ」より「速さ」。バーが遅く動いた瞬間にそのセットの意味は半減する'},
+      {t:'😴 疲れた日はスプリントのみ',b:'ウェイトの疲労が強い日でもスプリント5〜8本は必ず行う。ウェイトを削ってもスプリントは削らない'},
+      {t:'📊 毎週タイムを計測',b:'パワー期はタイムが週単位で改善する。記録することでモチベーションと成長実感を得る'}
+    ]
+  },
+  agility:{
+    split2:[
+      {day:'DAY 1',title:'下半身・側方爆発力',wu:'ラダードリル・バンドウォーク・ダイナミックランジ 各90秒',
+       ex:[['ラテラルバウンド（スケーター）','5×6(各側)','最大努力','横方向の最大爆発力。守備の飛び込み動作に直結'],['ラテラルボックスジャンプ','4×4(各側)','最大努力','横方向の爆発的跳躍'],['ハングパワークリーン','4×3','70%1RM（最大速度）','三重伸展の爆発力'],['デプスジャンプ','3×4','体重','SSC・反射的爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚の爆発的離地']],
+       cd:'股関節・大腿四頭筋・ふくらはぎ 各30秒×2'},
+      {day:'DAY 2',title:'体幹爆発力＋方向転換',wu:'コーンドリル・ラダー・ダイナミックストレッチ 各90秒',
+       ex:[['横向きスプリント折り返し（コーン5m）','5×5往復','最大努力','守備の方向転換能力を直接強化'],['メディシンボール壁投げ（横）','4×5(各側)','3〜5kg','守備の回旋・送球爆発力'],['ラテラルバウンド（追加）','3×5(各側)','最大努力','横方向追加爆発力'],['デプスプッシュアップ','3×5','体重','上半身の爆発的プッシュ'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身側方爆発力',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['ラテラルバウンド（スケーター）','5×6(各側)','最大努力','横方向最大爆発力'],['ラテラルボックスジャンプ','4×4(各側)','最大努力','横向き跳躍爆発力'],['ボックスジャンプ','4×4','最大努力','縦方向の爆発力'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発力'],['デプスジャンプ','3×4','体重','SSC強化']],
+       cd:'股関節・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'方向転換爆発力',wu:'コーンドリル・ラダー・スキップ 各90秒',
+       ex:[['横向きスプリント折り返し（5m）','5×5往復','最大努力','方向転換能力の直接強化'],['ハングパワークリーン','4×3','70%1RM（最大速度）','三重伸展爆発力'],['ラテラルバウンド（追加）','3×5(各側)','最大努力','横方向爆発追加'],['ジャンプスクワット','3×4','体重〜20%1RM','爆発的立ち上がり'],['デプスジャンプ（追加）','3×4','体重','SSC追加']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 3',title:'体幹・上半身爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボール壁投げ（横）','5×5(各側)','3〜5kg','送球・守備の回旋爆発力'],['横向きスプリント折り返し（追加）','3×3往復','最大努力','方向転換追加'],['デプスプッシュアップ','3×5','体重','上半身爆発プッシュ'],['メディシンボールスラム','3×5','5kg','体幹爆発的出力'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身側方爆発力（主）',wu:'ラダードリル・バンドウォーク 各90秒',
+       ex:[['ラテラルバウンド（スケーター）','5×6(各側)','最大努力','横方向最大爆発力'],['ラテラルボックスジャンプ','4×4(各側)','最大努力','横向き跳躍'],['シングルレッグジャンプ','3×4(各脚)','体重','片脚爆発力'],['ジャンプスクワット','3×4','体重〜20%1RM','立ち上がり爆発力'],['デプスジャンプ','3×4','体重','SSC強化']],
+       cd:'股関節・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'方向転換特化',wu:'コーンドリル・ラダー 各90秒',
+       ex:[['横向きスプリント折り返し（5m）','5×5往復','最大努力','守備方向転換の最大爆発力'],['ハングパワークリーン','4×3','70%1RM（最大速度）','三重伸展爆発力'],['ラテラルバウンド','3×5(各側)','最大努力','横方向追加'],['デプスジャンプ（追加）','3×4','体重','SSC追加'],['ジャンプランジ','3×5(各脚)','体重','方向転換切り替え爆発力']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 3',title:'体幹・反応爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボール壁投げ（横）','5×5(各側)','3〜5kg','守備送球回旋爆発力'],['メディシンボールスラム','4×5','5kg','体幹爆発的出力'],['横向きスプリント折り返し（追加）','3×3往復','最大努力','方向転換追加'],['シングルレッグジャンプ（追加）','3×4(各脚)','体重','片脚追加'],['フェイスプル','3×12','RPE6','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'全身連動爆発力統合',wu:'ラダードリル・コーンドリル 各90秒',
+       ex:[['ハングパワークリーン（追加）','3×3','70%1RM（最大速度）','三重伸展追加'],['ラテラルバウンド（最大速度）','4×5(各側)','最大努力','横方向最大速度'],['横向きスプリント折り返し','3×3往復','最大努力','方向転換統合'],['メディシンボール壁投げ','3×5(各側)','3〜5kg','回旋追加'],['フェイスプル','3×12','RPE6','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'↔️ 横が全て',b:'守備のパワー期は横方向の爆発力が最優先。ラテラルバウンドとラテラルボックスジャンプを最重視する'},
+      {t:'🔀 方向転換を必ずグラウンドで確認',b:'ウェイト後にコーンを使った守備ドリルを必ず実施。爆発力を守備の動きに変換する習慣をつける'},
+      {t:'⚡ 速度最優先・疲れたら終了',b:'爆発力トレーニングは疲れると効果が激減する。動作速度が落ちたら即そのセットを終了する'},
+      {t:'🦶 足首・膝のテーピング',b:'パワー期は高強度の方向転換が多い。練習前の足首テーピングと十分なウォームアップを徹底する'}
+    ]
+  },
+  injury:{
+    split2:[
+      {day:'DAY 1',title:'下半身安定爆発力',wu:'股関節90/90・バンドクラムシェル・バンドウォーク 各90秒',
+       ex:[['シングルレッグジャンプ（着地制御重視）','4×4(各脚)','体重','片脚の爆発的離地と安定した着地の両立'],['ゴブレットスクワット（中重量・爆発的）','4×6','RPE7（挙上爆発的）','股関節安定を保ちながら爆発的に立ち上がる'],['ラテラルバンドウォーク（素早く）','3×15(各方向)','軽バンド','中殿筋の素早い活性化'],['ヒップスラスト（爆発的）','3×5','RPE6（爆発的）','殿筋の爆発的収縮'],['ターミナルニーエクステンション（素早く）','3×12(各脚)','軽バンド','VMOの反応速度を高める']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹爆発力＋肩ケア',wu:'Y/T/W・バンドプルアパート 各90秒',
+       ex:[['メディシンボールスラム（制御して）','3×5','3kg（軽め）','体幹から末端への爆発的出力。腰を守りながら'],['パロフプレスジャーク（軽め）','3×6(各側)','軽〜中負荷','体幹から末端への爆発的連動を身につける'],['バンドEXターナルローテーション（素早く）','3×12(各腕)','軽バンド','外旋筋の反応速度を高める'],['フェイスプル','3×12','RPE6','肩後面ケア。パワー期でも継続'],['Y/T/Wレイズ','3×12','極軽量','肩甲骨の爆発的活性化']],
+       cd:'肩後面・体幹ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身安定爆発力',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['シングルレッグジャンプ（着地制御）','4×4(各脚)','体重','爆発力と安定の両立'],['ゴブレットスクワット（爆発的）','4×6','RPE7（爆発的）','股関節安定を保ちながら爆発的挙上'],['ラテラルバンドウォーク（素早く）','3×15(各方向)','軽バンド','中殿筋の反応速度向上'],['ヒップスラスト（爆発的）','3×5','RPE6（爆発的）','殿筋爆発的収縮'],['ターミナルニーエクステンション（素早く）','3×12(各脚)','軽バンド','VMO反応速度']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹爆発力',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['メディシンボールスラム（軽め・制御）','4×5','3kg','体幹爆発的出力'],['パロフプレスジャーク','4×6(各側)','軽〜中負荷','体幹爆発的連動'],['プランク（素早い移行バリエーション）','3×45秒','体重','体幹の動的爆発的安定'],['シングルレッグジャンプ（追加）','3×3(各脚)','体重','片脚爆発力追加'],['デッドバグ（素早く）','3×8(各側)','体重','腰椎安定の反応速度']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨・ローテーターカフ爆発力',wu:'Y/T/W・バンドプルアパート 各90秒',
+       ex:[['バンドEXターナルローテーション（素早く）','4×12(各腕)','軽バンド','外旋筋の反応速度強化'],['フェイスプル（素早い動作で）','3×12','RPE6','肩後面の反応速度'],['Y/T/Wレイズ','3×12','極軽量','肩甲骨爆発的活性化'],['メディシンボール壁投げ（軽め）','3×5(各側)','2kg','送球の爆発的連動・軽めで肩保護'],['懸垂（素早い引き・ゆっくり下降）','3×6','体重','広背筋の爆発的収縮']],
+       cd:'肩後面・広背筋 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身安定爆発力',wu:'股関節90/90・バンドクラムシェル 各90秒',
+       ex:[['シングルレッグジャンプ（着地制御）','4×4(各脚)','体重','爆発力と安定の両立'],['ゴブレットスクワット（爆発的）','4×6','RPE7（爆発的）','股関節安定を保ちながら爆発的挙上'],['ラテラルバンドウォーク（素早く）','3×15(各方向)','軽バンド','中殿筋反応速度'],['ヒップスラスト（爆発的）','3×5','RPE6（爆発的）','殿筋爆発的収縮'],['ターミナルニーエクステンション（素早く）','3×12(各脚)','軽バンド','VMO反応速度']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹爆発力',wu:'デッドバグ・バードドッグ 各90秒',
+       ex:[['メディシンボールスラム（軽め）','4×5','3kg','体幹爆発的出力'],['パロフプレスジャーク','4×6(各側)','軽〜中負荷','体幹爆発的連動'],['プランク動的バリエーション','3×45秒','体重','体幹動的爆発的安定'],['デッドバグ（素早く）','3×8(各側)','体重','腰椎安定反応速度'],['シングルレッグジャンプ（追加）','3×3(各脚)','体重','片脚爆発力追加']],
+       cd:'体幹全般 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨爆発力',wu:'Y/T/W・バンドプルアパート 各90秒',
+       ex:[['バンドEXターナルローテーション（素早く）','4×12(各腕)','軽バンド','外旋筋反応速度'],['フェイスプル（素早く）','3×12','RPE6','肩後面反応速度'],['Y/T/Wレイズ','3×12','極軽量','肩甲骨爆発的活性化'],['懸垂（爆発的引き）','3×6','体重','広背筋爆発的収縮'],['スキャプラープルアップ（素早く）','3×10','体重','前鋸筋爆発的活性化']],
+       cd:'肩後面・広背筋 各30秒×2'},
+      {day:'DAY 4',title:'全身統合爆発力',wu:'ダイナミックストレッチ全般 2分',
+       ex:[['メディシンボール壁投げ（軽め）','4×5(各側)','2〜3kg','全身連動爆発力統合'],['シングルレッグジャンプ（統合）','3×4(各脚)','体重','片脚爆発力統合'],['メディシンボールスラム（軽め）','3×5','3kg','体幹爆発的出力統合'],['バンドEXターナルローテーション（素早く）','3×12(各腕)','軽バンド','肩爆発的反応追加'],['フェイスプル','3×12','RPE6','仕上げ肩ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'⚡ 「速さ」の中でも「正確さ」を',b:'怪我予防のパワー期では爆発的な動作を行いながらも、着地・関節の位置を正確に保つことが最優先'},
+      {t:'🛡️ 痛みは即中止',b:'パワー期は高強度の爆発的動作が多い。関節に少しでも痛みが出たら即その種目を中止する'},
+      {t:'📏 軽めで始めて徐々に上げる',b:'爆発的種目は重量を上げるより動作の速さと正確さを重視。メディシンボールは軽めから始める'},
+      {t:'🧊 練習後のアイシング継続',b:'パワー期は関節への衝撃が増える。練習後のアイシング（10〜15分）は毎回欠かさず継続する'}
+    ]
+  }
+},
+
+// ══════════════════════════════════════════════
+// 大会期間（コンプ）
+// ══════════════════════════════════════════════
+comp:{
+  power:{
+    split2:[
+      {day:'DAY 1',title:'下半身維持（最小限ボリューム）',wu:'股関節モビリティ・動的ランジ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（爆発的挙上）','筋力を維持。疲労を溜めない。重量より速度優先'],['ルーマニアンデッドリフト','2×5','70%1RM','ハムストリングスの維持'],['シングルレッグRDL','2×6(各脚)','RPE6','着地安定性の維持'],['プランク','2×45秒','体重','体幹の活性化維持'],['カーフレイズ','2×10','RPE6','足首の維持']],
+       cd:'下半身・体幹ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'肩ケア＋上半身維持',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','シーズン最重要ケア。疲弊した外旋筋を守る'],['フェイスプル','3×15','軽重量','肩後面の維持・ケア'],['ベンチプレス（軽め）','2×5','70%1RM','上半身筋力の最低限維持'],['懸垂（2〜3回余裕残す）','2×5','体重','広背筋・肩甲骨の維持'],['プランク','2×45秒','体重','体幹活性化']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身維持',wu:'股関節モビリティ・動的ランジ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（爆発的）','最小限の刺激で筋力維持'],['ルーマニアンデッドリフト','2×5','70%1RM','ハムストリングス維持'],['シングルレッグRDL','2×6(各脚)','RPE6','着地安定維持'],['ヒップスラスト','2×6','RPE6','殿筋活性化維持'],['カーフレイズ','2×10','RPE6','足首維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'肩ケア＋体幹維持',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','シーズン最重要ケア'],['フェイスプル','3×15','軽重量','肩後面維持・ケア'],['プランク','3×45秒','体重','体幹の活性化維持'],['パロフプレス','2×10(各側)','RPE5','体幹抗回旋の維持'],['デッドバグ','2×8(各側)','体重','腰椎安定維持']],
+       cd:'肩後面・体幹ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身維持',wu:'バンドプルアパート・胸椎回旋 各60秒',
+       ex:[['ベンチプレス（爆発的・軽め）','2×5','70%1RM（爆発的）','上半身筋力維持。疲労は最小に'],['懸垂（2〜3回余裕残す）','2×5','体重','広背筋・肩甲骨安定の維持'],['ダンベルショルダープレス','2×8','RPE6','肩の安定性維持'],['ベントオーバーロウ','2×6','70%1RM','引く動作の維持'],['フェイスプル','3×15','RPE5','仕上げ肩ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身維持',wu:'股関節モビリティ 各60秒',
+       ex:[['バックスクワット','3×3','75%1RM（爆発的）','最小ボリュームで筋力維持'],['ルーマニアンデッドリフト','2×5','70%1RM','ハムストリングス維持'],['シングルレッグRDL','2×6(各脚)','RPE6','着地安定維持'],['ヒップスラスト','2×6','RPE6','殿筋維持'],['カーフレイズ','2×10','RPE6','足首維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'肩ケア（最優先）',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','シーズン最重要ケア'],['フェイスプル','3×15','軽重量','肩後面ケア'],['Y/T/Wレイズ','3×12','極軽量','肩甲骨活性化維持'],['プランク','2×45秒','体重','体幹維持'],['デッドバグ','2×8(各側)','体重','腰椎安定維持']],
+       cd:'肩後面ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身維持',wu:'バンドプルアパート・胸椎回旋 各60秒',
+       ex:[['ベンチプレス（爆発的）','2×5','70%1RM（爆発的）','上半身筋力の最低限維持'],['懸垂','2×5','体重','広背筋維持'],['ダンベルショルダープレス','2×8','RPE6','肩安定維持'],['フェイスプル','3×15','RPE5','追加肩ケア'],['プランク','2×45秒','体重','体幹追加維持']],
+       cd:'上半身ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'コンディショニング',wu:'フォームローラー全身・動的ストレッチ 各2分',
+       ex:[['フォームローラー（胸椎・広背・殿筋）','各2分','自重','筋膜リリース。試合の疲労を取り除く'],['バンドEXターナルローテーション（追加）','3×15(各腕)','軽バンド','追加肩ケア'],['デッドバグ','2×8(各側)','体重','腰椎安定維持'],['プランク','2×45秒','体重','体幹活性化維持'],['ヒップフレクサーストレッチ（バンド補助）','各2分','軽バンド','腸腰筋柔軟性維持']],
+       cd:'全身静的ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🎯 維持が目的、伸ばすのは次シーズン',b:'大会期間はオフシーズンで積み上げた能力を使い切る期間。ウェイトで疲れを溜めるのは本末転倒'},
+      {t:'🛡️ 肩ケアは毎日',b:'バンドEXターナルローテーションとフェイスプルは登板前日・前々日も実施。試合後も欠かさない'},
+      {t:'📅 試合前後のスケジュール管理',b:'登板・先発翌日は上半身ウェイト禁止。試合3日前からは全体的にボリュームを落とす'},
+      {t:'🧊 試合後のアイシング',b:'投球後は肩・肘を10〜15分アイシング。捕手は膝・腰も追加。これを怠ると長期的に消耗する'}
+    ]
+  },
+  batting:{
+    split2:[
+      {day:'DAY 1',title:'下半身・体幹維持',wu:'股関節モビリティ・動的ランジ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（爆発的）','打撃下半身の最小ボリューム維持'],['ヒップスラスト（爆発的）','2×5','RPE7（爆発的）','殿筋の爆発的活性化維持'],['ケーブル水平回旋（軽め・素早く）','2×6(各側)','RPE6（速度重視）','打撃回旋の神経パターン維持'],['プランク','2×45秒','体重','体幹活性化維持'],['カーフレイズ','2×10','RPE6','足首維持']],
+       cd:'下半身・体幹ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'上半身維持＋肩ケア',wu:'バンドプルアパート・胸椎回旋 各60秒',
+       ex:[['ベンチプレス（爆発的）','2×5','70%1RM（爆発的）','インパクト神経パターンの維持'],['懸垂（余裕残す）','2×5','体重','広背筋維持'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','肩ケア'],['フェイスプル','3×15','軽重量','肩後面ケア'],['プランク','2×45秒','体重','体幹維持']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身維持',wu:'股関節モビリティ・動的ランジ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（爆発的）','打撃下半身筋力維持'],['ヒップスラスト（爆発的）','2×5','RPE7（爆発的）','殿筋活性化維持'],['シングルレッグRDL','2×5(各脚)','RPE6','着地安定維持'],['カーフレイズ','2×10','RPE6','足首維持'],['プランク','2×45秒','体重','体幹維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'回旋維持＋体幹',wu:'胸椎回旋 各60秒',
+       ex:[['ケーブル水平回旋（軽め・素早く）','3×5(各側)','RPE6（速度重視）','打撃回旋パターンの維持'],['メディシンボールロータリースロー（軽め）','2×5(各側)','2〜3kg','爆発的回旋パターンの維持'],['パロフプレス','2×8(各側)','RPE5','体幹剛性維持'],['プランク','2×45秒','体重','体幹維持'],['デッドバグ','2×6(各側)','体重','腰椎安定維持']],
+       cd:'体幹・殿筋ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身維持',wu:'バンドプルアパート・胸椎回旋 各60秒',
+       ex:[['ベンチプレス（爆発的）','2×5','70%1RM（爆発的）','インパクト維持'],['懸垂','2×5','体重','広背筋維持'],['ダンベルショルダープレス','2×8','RPE6','肩安定維持'],['フェイスプル','3×15','RPE5','肩後面ケア'],['バンドEXターナルローテーション','2×15(各腕)','軽バンド','肩ケア']],
+       cd:'上半身全般ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身維持',wu:'股関節モビリティ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM','打撃下半身維持'],['ヒップスラスト（爆発的）','2×5','RPE7（爆発的）','殿筋活性化維持'],['シングルレッグRDL','2×5(各脚)','RPE6','着地安定維持'],['プランク','2×45秒','体重','体幹維持'],['カーフレイズ','2×10','RPE6','足首維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'回旋維持',wu:'胸椎回旋 各60秒',
+       ex:[['ケーブル水平回旋（軽め・素早く）','3×5(各側)','RPE6（速度重視）','打撃回旋パターン維持'],['メディシンボールロータリースロー（軽め）','2×5(各側)','2〜3kg','爆発的回旋維持'],['パロフプレス','2×8(各側)','RPE5','体幹剛性維持'],['プランク','2×45秒','体重','体幹維持'],['デッドバグ','2×6(各側)','体重','腰椎安定維持']],
+       cd:'体幹ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'上半身維持',wu:'バンドプルアパート 各60秒',
+       ex:[['ベンチプレス（爆発的）','2×5','70%1RM（爆発的）','インパクト維持'],['懸垂','2×5','体重','広背筋維持'],['フェイスプル','3×15','RPE5','肩後面ケア'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','肩ケア'],['プランク','2×45秒','体重','体幹追加維持']],
+       cd:'上半身ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'コンディショニング',wu:'フォームローラー全身・動的ストレッチ 各2分',
+       ex:[['フォームローラー全身','各2分','自重','筋膜リリース'],['バンドEXターナルローテーション（追加）','3×15(各腕)','軽バンド','追加肩ケア'],['ケーブル水平回旋（非常に軽め）','2×5(各側)','RPE5','回旋パターン維持'],['プランク','2×45秒','体重','体幹維持'],['ヒップフレクサーストレッチ','各2分','自重','腸腰筋柔軟性維持']],
+       cd:'全身静的ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏏 週1回のティーで感触確認',b:'ウェイトを試合に繋げるため週1回ティーバッティングで感触を確認。重さより速さ（バットスピード）を意識'},
+      {t:'🔄 回旋パターンの維持が最重要',b:'ケーブル回旋・メディシンボールスローを週2回以上実施し、神経パターンを維持する'},
+      {t:'🍽️ 食事の質を上げる',b:'シーズン中は消費カロリーが多い。炭水化物を削らず適切に摂ることで打撃パフォーマンスを維持する'},
+      {t:'😴 睡眠が一番の調整法',b:'試合前日は7〜9時間の睡眠を確保。ウェイトより睡眠の方が翌日のパフォーマンスへの影響が大きい'}
+    ]
+  },
+  speed:{
+    split2:[
+      {day:'DAY 1',title:'下半身維持＋爆発力保持',wu:'ダイナミックストレッチ・スキップ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（最大速度で挙上）','筋力と爆発力を最小ボリュームで維持'],['ボックスジャンプ','3×3','最大努力','縦方向爆発力の維持'],['スプリント10m','5本','最大努力','走力の神経パターン維持'],['ノルディックカール','2×6','体重','肉離れ予防の継続'],['カーフレイズ（片足）','2×10(各脚)','RPE6','足首の維持']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋補助維持',wu:'動的ストレッチ全般 60秒',
+       ex:[['プランク','3×45秒','体重','走行中の体幹剛性維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋の維持'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋の爆発的活性化維持'],['デッドリフト（軽め）','2×5','70%1RM','後面連鎖の最低限維持'],['シングルレッグRDL','2×5(各脚)','RPE6','片脚着地安定維持']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身爆発力維持',wu:'ダイナミックストレッチ・スキップ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（最大速度）','爆発力維持'],['ボックスジャンプ','3×3','最大努力','縦方向爆発力維持'],['スプリント10〜20m','5本','最大努力','走力神経パターン維持'],['ノルディックカール','2×6','体重','肉離れ予防継続'],['カーフレイズ片足','2×10(各脚)','RPE6','足首維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'体幹維持',wu:'動的ストレッチ全般 60秒',
+       ex:[['プランク（各バリエーション）','3×45秒','体重','体幹剛性維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋活性化維持'],['デッドバグ','2×6(各側)','体重','腰椎安定維持'],['シングルレッグRDL','2×5(各脚)','RPE6','片脚安定維持']],
+       cd:'体幹全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'補助＋スプリント',wu:'ダイナミックストレッチ・スキップ 各60秒',
+       ex:[['デッドリフト（軽め）','2×5','70%1RM','後面連鎖最低限維持'],['スプリント20〜30m','5本','最大努力','走力維持'],['ラテラルバウンド（軽め）','2×4(各側)','体重','横方向維持'],['ノルディックカール（追加）','2×6','体重','肉離れ予防追加'],['フェイスプル','2×12','RPE5','肩後面ケア']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身爆発力維持',wu:'ダイナミックストレッチ・スキップ 各60秒',
+       ex:[['バックスクワット（爆発的）','3×3','75%1RM（最大速度）','爆発力維持'],['ボックスジャンプ','3×3','最大努力','縦方向爆発力維持'],['スプリント10m','5本','最大努力','走力神経パターン維持'],['ノルディックカール','2×6','体重','肉離れ予防継続'],['カーフレイズ片足','2×10(各脚)','RPE6','足首維持']],
+       cd:'下半身全般 各30秒×2'},
+      {day:'DAY 2',title:'体幹維持',wu:'動的ストレッチ全般 60秒',
+       ex:[['プランク（各バリエーション）','3×45秒','体重','体幹剛性維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋活性化維持'],['デッドバグ','2×6(各側)','体重','腰椎安定維持'],['シングルレッグRDL','2×5(各脚)','RPE6','片脚安定維持']],
+       cd:'体幹全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'スプリント特化',wu:'ダイナミックストレッチ・スキップ・ドリル 各60秒',
+       ex:[['スプリント20〜30m','6〜8本','最大努力','走力の最大維持'],['ラテラルバウンド','2×4(各側)','体重','横方向維持'],['ボックスジャンプ（追加）','2×3','最大努力','爆発力追加'],['デプスジャンプ','2×3','体重','SSC維持'],['ノルディックカール','2×6','体重','肉離れ予防']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'コンディショニング',wu:'フォームローラー全身 各2分',
+       ex:[['フォームローラー全身','各2分','自重','筋膜リリース'],['デッドリフト（非常に軽め）','2×5','65%1RM','後面連鎖最低限維持'],['プランク','2×45秒','体重','体幹維持'],['ノルディックカール（追加）','2×6','体重','肉離れ予防継続'],['フェイスプル','2×12','RPE5','肩後面ケア']],
+       cd:'全身静的ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🏃 ウェイトよりスプリントを優先',b:'大会期間中はウェイトを削ってでもグラウンドでのスプリントを維持する。走力は使わないと落ちる'},
+      {t:'🛡️ ノルディックカールは絶対に継続',b:'シーズン中でもノルディックカールは週2回実施。肉離れ予防を止めると試合中にリスクが一気に上がる'},
+      {t:'😴 睡眠と水分が走力を守る',b:'脱水と睡眠不足は走力を著しく低下させる。試合前日は水分補給を積極的に行い、十分に睡眠を取る'},
+      {t:'📊 毎月タイム計測で確認',b:'月1回20mダッシュを計測し、走力が維持できているか確認する。低下していればスプリント本数を増やす'}
+    ]
+  },
+  agility:{
+    split2:[
+      {day:'DAY 1',title:'下半身・側方爆発力維持',wu:'ラダードリル・コーンドリル 各60秒',
+       ex:[['ラテラルバウンド（軽め）','3×4(各側)','最大努力','横方向爆発力の神経パターン維持'],['ボックスジャンプ','3×3','最大努力','縦方向爆発力維持'],['バックスクワット（爆発的）','2×3','75%1RM（最大速度）','筋力・爆発力の最低限維持'],['横向きスプリント折り返し','3×3往復','最大努力','方向転換能力の維持'],['ノルディックカール','2×6','体重','肉離れ予防継続']],
+       cd:'股関節・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋肩維持',wu:'バンドプルアパート・Y/T/W 各60秒',
+       ex:[['プランク','3×45秒','体重','体幹剛性の維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','肩ケア維持'],['フェイスプル','3×15','軽重量','肩後面ケア継続'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋活性化維持']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'側方爆発力維持',wu:'ラダードリル・コーンドリル 各60秒',
+       ex:[['ラテラルバウンド','3×4(各側)','最大努力','横方向爆発力維持'],['横向きスプリント折り返し','3×3往復','最大努力','方向転換維持'],['バックスクワット（爆発的）','2×3','75%1RM（最大速度）','筋力維持'],['ボックスジャンプ','2×3','最大努力','縦方向爆発力維持'],['ノルディックカール','2×6','体重','肉離れ予防']],
+       cd:'股関節・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹維持',wu:'デッドバグ・バンドプルアパート 各60秒',
+       ex:[['プランク','3×45秒','体重','体幹維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','肩ケア'],['フェイスプル','3×15','軽重量','肩後面ケア'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋維持']],
+       cd:'体幹・肩後面ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'守備ドリル＋補助維持',wu:'ラダードリル・コーンドリル 各60秒',
+       ex:[['守備ドリル（コーン・ラダー集中）','10〜15分','最大努力','守備特化の方向転換能力を直接強化'],['メディシンボール壁投げ（軽め）','2×5(各側)','2〜3kg','送球回旋維持'],['シングルレッグジャンプ（軽め）','2×3(各脚)','体重','片脚爆発力維持'],['フェイスプル','3×15','RPE5','肩後面ケア追加'],['プランク','2×45秒','体重','体幹追加維持']],
+       cd:'全身ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'側方爆発力維持',wu:'ラダードリル・コーンドリル 各60秒',
+       ex:[['ラテラルバウンド','3×4(各側)','最大努力','横方向爆発力維持'],['横向きスプリント折り返し','3×3往復','最大努力','方向転換維持'],['バックスクワット（爆発的）','2×3','75%1RM（最大速度）','筋力維持'],['ボックスジャンプ','2×3','最大努力','縦方向爆発力維持'],['ノルディックカール','2×6','体重','肉離れ予防']],
+       cd:'股関節・大腿四頭筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹・肩ケア維持',wu:'デッドバグ・バンドプルアパート 各60秒',
+       ex:[['プランク','3×45秒','体重','体幹維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['バンドEXターナルローテーション','3×15(各腕)','軽バンド','肩ケア'],['フェイスプル','3×15','軽重量','肩後面ケア'],['ヒップスラスト（爆発的）','2×5','RPE6（爆発的）','殿筋維持']],
+       cd:'体幹・肩後面ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'守備ドリル特化',wu:'ラダードリル・コーンドリル 各90秒',
+       ex:[['守備ドリル集中（コーン・ラダー）','15〜20分','最大努力','守備能力を直接維持・強化'],['ラテラルバウンド（追加）','2×4(各側)','最大努力','横方向追加'],['シングルレッグジャンプ','2×3(各脚)','体重','片脚爆発力維持'],['メディシンボール壁投げ（軽め）','2×5(各側)','2〜3kg','送球回旋維持'],['フェイスプル','2×12','RPE5','肩後面追加ケア']],
+       cd:'下半身全般ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'コンディショニング',wu:'フォームローラー全身 各2分',
+       ex:[['フォームローラー全身','各2分','自重','筋膜リリース'],['バンドEXターナルローテーション（追加）','3×15(各腕)','軽バンド','肩ケア追加'],['プランク','2×45秒','体重','体幹維持'],['ターミナルニーエクステンション','2×12(各脚)','軽バンド','膝安定維持'],['ヒップフレクサーストレッチ','各2分','自重','腸腰筋柔軟性維持']],
+       cd:'全身静的ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'↔️ 守備ドリルをウェイトより優先',b:'大会期間中は守備の動きを実際にグラウンドで行う時間を確保。ウェイトを削ってでも守備ドリルを優先'},
+      {t:'🦶 足首テーピングを継続',b:'シーズン中は試合前の足首テーピングを必ず継続。捻挫は一瞬で守備力を奪う'},
+      {t:'😴 試合の疲労は睡眠で回復',b:'連戦の疲れは睡眠以外で解消できない。ウェイトを増やすより睡眠時間を確保することを最優先にする'},
+      {t:'🧊 試合後の部位別アイシング',b:'試合後は膝・肩・足首を部位別に10〜15分アイシング。これを続けることで慢性炎症を防ぐ'}
+    ]
+  },
+  injury:{
+    split2:[
+      {day:'DAY 1',title:'下半身安定維持',wu:'股関節90/90・バンドクラムシェル 各60秒',
+       ex:[['ゴブレットスクワット（軽め）','2×10','RPE5','股関節安定の最低限維持'],['シングルレッグRDL（軽め）','2×8(各脚)','RPE5','後面偏心の維持'],['ラテラルバンドウォーク','2×12(各方向)','軽バンド','中殿筋活性化維持'],['ヒップスラスト','2×8','RPE5','殿筋活性化維持'],['ターミナルニーエクステンション','2×12(各脚)','軽バンド','膝安定維持']],
+       cd:'股関節・殿筋ストレッチ 各30秒×2'},
+      {day:'DAY 2',title:'体幹＋肩ケア維持',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','シーズン中の肩ケア最重要継続'],['フェイスプル','3×15','軽重量','肩後面ケア継続'],['プランク','2×45秒','体重','体幹の最低限維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['デッドバグ','2×6(各側)','体重','腰椎安定維持']],
+       cd:'肩後面・体幹ストレッチ 各30秒×2'}
+    ],
+    split3:[
+      {day:'DAY 1',title:'下半身安定維持',wu:'股関節90/90・バンドクラムシェル 各60秒',
+       ex:[['ゴブレットスクワット（軽め）','2×10','RPE5','股関節安定維持'],['シングルレッグRDL（軽め）','2×8(各脚)','RPE5','後面偏心維持'],['ラテラルバンドウォーク','2×12(各方向)','軽バンド','中殿筋活性化維持'],['ヒップスラスト','2×8','RPE5','殿筋維持'],['ターミナルニーエクステンション','2×12(各脚)','軽バンド','膝安定維持']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹維持',wu:'デッドバグ・バードドッグ 各60秒',
+       ex:[['プランク','3×45秒','体重','体幹剛性の維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['デッドバグ','2×8(各側)','体重','腰椎安定維持'],['サイドプランク','2×30秒(各側)','体重','側面体幹維持'],['バードドッグ','2×8(各側)','体重','体幹安定維持']],
+       cd:'体幹全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨・ローテーターカフ維持',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','外旋筋ケア継続'],['フェイスプル','3×15','軽重量','肩後面ケア継続'],['Y/T/Wレイズ','2×12','極軽量','肩甲骨活性化維持'],['スキャプラープルアップ','2×10','体重','前鋸筋・下部僧帽筋維持'],['懸垂（少回数・余裕残す）','2×5','体重','広背筋・肩甲骨安定維持']],
+       cd:'肩後面・広背筋ストレッチ 各30秒×2'}
+    ],
+    split4:[
+      {day:'DAY 1',title:'下半身安定維持',wu:'股関節90/90・バンドクラムシェル 各60秒',
+       ex:[['ゴブレットスクワット（軽め）','2×10','RPE5','股関節安定維持'],['シングルレッグRDL（軽め）','2×8(各脚)','RPE5','後面偏心維持'],['ラテラルバンドウォーク','2×12(各方向)','軽バンド','中殿筋活性化維持'],['ヒップスラスト','2×8','RPE5','殿筋維持'],['ターミナルニーエクステンション','2×12(各脚)','軽バンド','膝安定維持']],
+       cd:'股関節・殿筋 各30秒×2'},
+      {day:'DAY 2',title:'体幹維持',wu:'デッドバグ・バードドッグ 各60秒',
+       ex:[['プランク','3×45秒','体重','体幹剛性維持'],['パロフプレス','2×8(各側)','RPE5','体幹抗回旋維持'],['デッドバグ','2×8(各側)','体重','腰椎安定維持'],['サイドプランク','2×30秒(各側)','体重','側面体幹維持'],['バードドッグ','2×8(各側)','体重','体幹安定維持']],
+       cd:'体幹全般ストレッチ 各30秒×2'},
+      {day:'DAY 3',title:'肩甲骨・ローテーターカフ維持',wu:'Y/T/W・バンドプルアパート 各60秒',
+       ex:[['バンドEXターナルローテーション','3×15(各腕)','軽バンド','外旋筋ケア継続'],['フェイスプル','3×15','軽重量','肩後面ケア継続'],['Y/T/Wレイズ','2×12','極軽量','肩甲骨活性化維持'],['スキャプラープルアップ','2×10','体重','前鋸筋・下部僧帽筋維持'],['懸垂（余裕残す）','2×5','体重','広背筋・肩甲骨安定維持']],
+       cd:'肩後面・広背筋ストレッチ 各30秒×2'},
+      {day:'DAY 4',title:'コンディショニング',wu:'フォームローラー全身・動的ストレッチ 各2分',
+       ex:[['フォームローラー全身','各2分','自重','筋膜リリース。試合疲労を除く'],['バンドEXターナルローテーション（追加）','3×15(各腕)','軽バンド','追加肩ケア'],['プランク','2×45秒','体重','体幹維持'],['ヒップスラスト','2×8','RPE5','殿筋活性化維持'],['ヒップフレクサーストレッチ','各2分','自重','腸腰筋柔軟性維持']],
+       cd:'全身静的ストレッチ 各30秒×2'}
+    ],
+    adv:[
+      {t:'🛡️ 予防は試合中も続く',b:'大会期間中に怪我予防を緩めると慢性的な炎症が蓄積する。バンドEXターナルローテーションとフェイスプルは毎試合後も実施'},
+      {t:'🧊 アイシングルーティン化',b:'試合後の肩・肘・膝・足首のアイシング（10〜15分）を全選手の必須ルーティンにする'},
+      {t:'🔄 フォームローラーは毎日',b:'シーズン中も毎日3〜5分のフォームローラーを継続。可動域の低下が怪我リスクを高める'},
+      {t:'⚠️ 違和感は「休む勇気」',b:'試合に出たい気持ちは大切だが、違和感を無視すると数週間の離脱に繋がる。早期発見・早期対処が最善'}
+    ]
+  }
+},
+}; // END DB
+
+// =====================================================================
+// UI ロジック
+// =====================================================================
+let selectedPhase = null;
+
+function selectPhase(phase) {
+  selectedPhase = phase;
+  document.querySelectorAll('.pc').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.pc[data-phase="${phase}"]`).classList.add('active');
+}
+
+function generate() {
+  if (!selectedPhase) {
+    alert('トレーニング期を選択してください');
+    return;
+  }
+  const pos   = document.getElementById('pos').value;
+  const goal  = document.getElementById('goal').value;
+  const days  = parseInt(document.getElementById('days').value);
+  const phase = selectedPhase;
+  const meta  = PHASE_META[phase];
+
+  const data = DB[phase][goal];
+  if (!data) { alert('この組み合わせは現在準備中です'); return; }
+  const splitKey = days <= 2 ? 'split2' : days === 4 ? 'split4' : 'split3';
+  const splits = data[splitKey] || data['split3'];
+
+  // タイムライン
+  ['hyper','strength','power','comp'].forEach(p => {
+    const el = document.getElementById('tl-'+p);
+    el.className = `tl-item tl-${p} ${p === phase ? 'tl-active' : 'tl-inactive'}`;
+  });
+
+  // フェーズバナー
+  const pbColor = meta.color;
+  const banner = document.getElementById('phase-banner');
+  banner.style.setProperty('--pbcolor', pbColor);
+  document.getElementById('pb-phase-label').textContent = meta.label;
+  document.getElementById('pb-title').textContent = meta.title;
+  document.getElementById('pb-desc').textContent = meta.desc;
+  document.getElementById('pb-weeks').textContent = meta.weeks;
+  document.getElementById('pb-weeks-sub').textContent = meta.weeksSub;
+  document.getElementById('pb-deload').textContent = meta.deload;
+  document.getElementById('pb-deload-sub').textContent = meta.deloadSub;
+
+  // バッジ
+  const posLabel = {pitcher:'投手',catcher:'捕手',infield:'内野手',outfield:'外野手'}[pos];
+  const goalLabel = {power:'球速・パワー',batting:'バッティング飛距離',speed:'走力・スプリント',agility:'守備・アジリティ',injury:'怪我予防・体幹'}[goal];
+  document.getElementById('rbadge').textContent = posLabel + ' ／ ' + goalLabel;
+
+  // 処方箋ノート
+  const rx = meta.rx;
+  document.getElementById('lnote').innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div class="slabel">この期間の処方箋</div>
+      <div class="rx-grid">
+        <div class="rx-item"><div class="rx-item-label">セット数</div><div class="rx-item-val">${rx.sets}</div></div>
+        <div class="rx-item"><div class="rx-item-label">レップ数</div><div class="rx-item-val">${rx.reps}</div></div>
+        <div class="rx-item"><div class="rx-item-label">負荷</div><div class="rx-item-val">${rx.load}</div></div>
+        <div class="rx-item"><div class="rx-item-label">インターバル</div><div class="rx-item-val">${rx.rest}</div></div>
+        <div class="rx-item"><div class="rx-item-label">テンポ</div><div class="rx-item-val" style="font-size:13px;font-family:'Noto Sans JP',sans-serif;font-weight:700;">${rx.tempo}</div></div>
+        <div class="rx-item"><div class="rx-item-label">余裕</div><div class="rx-item-val" style="font-size:13px;font-family:'Noto Sans JP',sans-serif;font-weight:700;">${rx.rir}</div></div>
+      </div>
+    </div>
+  `;
+
+  // カード
+  const cardsEl = document.getElementById('cards');
+  cardsEl.innerHTML = splits.map((day, i) => `
+    <div class="card ${i===0?'open':''}">
+      <div class="card-h" onclick="this.closest('.card').classList.toggle('open')">
+        <span class="dbadge">${day.day}</span>
+        <span class="dtitle">${day.title}</span>
+        <span class="dicon">▼</span>
+      </div>
+      <div class="card-b">
+        <div class="slabel">ウォームアップ（5〜10分）</div>
+        <div class="nbox">🔥 ${day.wu}</div>
+        <div class="slabel">メインメニュー <span style="font-size:9px;color:var(--muted);letter-spacing:1px;font-family:'Noto Sans JP',sans-serif;font-weight:400;text-transform:none;">種目をタップで詳細</span></div>
+        <table class="ex-table">
+          <thead><tr><th>種目</th><th>組数×回数</th><th>負荷目安</th><th>野球特化ポイント</th></tr></thead>
+          <tbody>${day.ex.map(e=>`<tr class="ex-row" onclick="showDetail('${e[0].replace(/'/g,"\\'")}')"><td>${e[0]} <span class="ex-tap">▶</span></td><td>${e[1]}</td><td>${e[2]}</td><td>${e[3]}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="slabel">クールダウン（5分）</div>
+        <div class="nbox">🧊 ${day.cd}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('advice').innerHTML = data.adv.map(a =>
+    `<div class="aitem"><strong>${a.t}</strong>${a.b}</div>`
+  ).join('');
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+
+// ── 種目詳細DB ──────────────────────────────────
+const EX_DB = {
+  'バックスクワット':{
+    steps:['バーを僧帽筋上部（ハイバー）または下部（ローバー）に乗せ、肩幅より少し広く足を開く','胸を張り背中をフラットに保ちながら息を吸って腹圧を高める','膝をつま先方向に向けながら股関節と膝を同時に曲げて下降（4秒）','太ももが床と平行になるまで下ろし、踵で地面を押すように力強く立ち上がる'],
+    cues:['「床を踏み割る」イメージで足裏全体に力を伝える','膝がつま先より内側に入らないよう常に意識','胸を張り続ける。丸まると腰への負担が急増する'],
+    cautions:['重量は正しいフォームを維持できる範囲に留める','膝のニーケーブは故障の元。鏡で確認','腰が丸まり始めたらその重量は重すぎる'],
+    baseball:'下半身全体の爆発的な力発揮の基礎。打撃の踏み込み・投球の推進力・走塁の加速全てに直結する。'
+  },
+  'ルーマニアンデッドリフト':{
+    steps:['肩幅で立ちバーをオーバーハンドで握る（膝は軽く曲げた状態を保つ）','背中をフラットに保ちながら股関節を後ろに引くように上体を前傾','ハムストリングスにしっかりとした伸長感が出るまでバーを下ろす','ハムストリングスを収縮させて股関節を前に押し出すように立ち上がる'],
+    cues:['「お尻を後ろの壁に押しつける」イメージで股関節をヒンジ','バーは体のすぐそばを通過させる。離れると腰への負担増','下降中はハムストリングスの伸長感だけに集中'],
+    cautions:['背中が丸まったら即中止','膝を曲げすぎるとハムへの刺激が減る','首を反らしすぎない。頭は背骨の延長線上'],
+    baseball:'ハムストリングスの強化は走速度・盗塁・肉離れ予防に直結。投球時の踏み込み脚の粘りも向上する。'
+  },
+  'デッドリフト':{
+    steps:['足を腰幅に開き、バーの真上に中足部が来るように立つ','股関節を折り込みながら腰を下ろし肩幅でバーを握る（背中はフラット）','息を吸って腹圧を高め（ブレーシング）、バーを体に沿わせながら引き上げる','腰と膝を同時に伸ばしロックアウト（臀部を絞る）。下降は逆手順でゆっくり'],
+    cues:['「床を押す」感覚で引き始める。引くのでなく押すイメージ','肩甲骨を後ろに引いてからバーを持つ','バーが膝を通過したら腰を前に押し出してロックアウト'],
+    cautions:['腰が丸まった状態での高重量は危険','息を吐いたまま引くと腹圧が抜けて腰を痛める','降ろす動作も丁寧に。バウンシングは控える'],
+    baseball:'全身後面連鎖（ハム・殿筋・脊柱起立筋）の強化。送球・打撃の地面反力を最大化するために不可欠。'
+  },
+  'ブルガリアンスプリットスクワット':{
+    steps:['後ろ足をベンチや台に乗せ前足を一歩半前に出す','前足の膝がつま先の方向と一致するよう向きを調整','上体をまっすぐ保ちながら前膝を曲げて下降（後ろ足は補助のみ）','前足の踵で地面を押して元の位置に戻る'],
+    cues:['重心は前足の踵寄りに置く','体幹を垂直に保つ','後ろ足には力を入れない。あくまで補助'],
+    cautions:['膝の痛みがある場合は前足の位置を後ろに調整','バランスが崩れやすいため最初は軽重量で','後ろ膝が床につくとき前膝が内側に入っていないか確認'],
+    baseball:'片脚での爆発的な力発揮を鍛える。打撃の踏み込み・投球の着地脚の安定性に直結する高特異性種目。'
+  },
+  'ヒップスラスト':{
+    steps:['肩甲骨をベンチの縁に当てて座り、バーを股関節の付け根に当てる（パッド使用）','足を骨盤幅に開き膝を90度に設定。つま先は真っ直ぐかやや外向き','地面を踏んで腰を持ち上げ股関節を完全に伸展させてロックアウト','臀部を意識しながらゆっくり下降し、床スレスレで止める'],
+    cues:['ロックアウト時に臀部を強く絞る（1〜2秒保持）','膝が内側に入らないよう常に外に向ける','腰を過度に反らさない。脊椎はニュートラルを保つ'],
+    cautions:['バーが直接骨に当たる場合は必ずパッドを使う','膝の角度は90度を維持','重量増加は段階的に'],
+    baseball:'殿筋の最大収縮力を高める。走塁の加速・打撃のヒップターン・投球の地面反力全てに貢献する。'
+  },
+  'ベンチプレス':{
+    steps:['肩甲骨を後ろに引いてベンチに対してアーチを作る','バーを肩幅より少し広めに握り、肩の真上に構える','息を吸って腹圧を高め、バーを乳頭ライン（胸中央部）にゆっくり下降','胸にタッチしたら爆発的に押し上げる。肘が完全に伸びる手前でキープ'],
+    cues:['「バーを折り曲げる」イメージで両手を内側に絞りながら押す','足で地面を押してレッグドライブを使う','肩甲骨をベンチに刺すように保持し続ける'],
+    cautions:['肩の痛みがある場合はグリップ幅を変更するかダンベルに切り替え','バーを胸でバウンスさせない','手首が過度に反らないよう注意'],
+    baseball:'上半身プッシュ力の基礎。打球を押し込む力・送球の強さ・投球リリースの力を強化する。'
+  },
+  'インクラインダンベルプレス':{
+    steps:['インクラインベンチを30〜45度に設定し、ダンベルを両手に持つ','肩甲骨を引いてアーチを作り、ダンベルを胸上部（鎖骨下）に構える','肘を45度の角度に保ちながらゆっくり下降','胸上部を意識しながら押し上げる。上で少し絞る'],
+    cues:['肘を外に開きすぎない（45度が目安）','下降時に胸上部のストレッチを感じる','上で手のひらを内側に回すと収縮感が増す'],
+    cautions:['肩への負担を最小化するため肘は肩より低い位置に保つ','重すぎるダンベルは肩関節への負担が大きい','セット終了時のダンベルの扱いに注意'],
+    baseball:'胸上部〜肩前部の強化。送球時の腕の加速局面・打球を押し込むフォロースルーに貢献する。'
+  },
+  'ベントオーバーロウ':{
+    steps:['バーを肩幅よりやや広めに持ち、ヒップヒンジで上体を45〜60度前傾させる','背中はフラット。膝は軽く曲げバーは膝の少し下あたりに垂らす','肘を後方に引きながらバーをへその上あたりに引きつける','肩甲骨を完全に絞り込んでからゆっくり下降'],
+    cues:['「肘を床に向けて後ろに引く」イメージ','引き終わりで肩甲骨を絞り込み1秒保持','前傾角度を一定に保つ'],
+    cautions:['背中が丸まった状態での高重量は厳禁','反動を使いすぎると刺激が分散する','腰痛持ちはシーテッドロウなど代替種目を検討'],
+    baseball:'背中の厚みと肩甲骨の安定性を強化。送球の腕引き・バッティングのフォロースルー・守備の強肩に直結する。'
+  },
+  'ダンベルロウ':{
+    steps:['片手をベンチについて上体を水平に近く傾け、対角の手でダンベルを持つ','ダンベルが完全に腕を伸ばした位置から、肘を天井に向けて引き上げる','ダンベルが腰の横に来るまで引き肩甲骨を内側に絞り込む','ゆっくりと元の位置まで下降し広背筋のストレッチを感じる'],
+    cues:['体を回転させずに肘だけを上に引く','引き終わりで肩甲骨で何かを挟むイメージ','下降時に広背筋のストレッチを感じるまで伸ばす'],
+    cautions:['腰をひねって反動を使うと広背筋への刺激が減る','片側ずつなので左右均等に行う'],
+    baseball:'広背筋と大円筋を片側ずつ強化。送球加速・バッティングの引き手の動作に直結する。'
+  },
+  'ケーブルロウ':{
+    steps:['ケーブルロウマシンに座り、ハンドルを両手で持つ','背中を垂直に保ち胸を張って少し前傾する','肘を体側に引きつけながらハンドルを腹部に引き寄せる','肩甲骨を絞り込み1秒保持し、ゆっくり元に戻す'],
+    cues:['引く前に胸を張ってセットアップを作る','肘を広げすぎない。体側に沿って引く','戻す時も丁寧に広背筋を伸ばす'],
+    cautions:['体を大きく後ろに倒すチーティングは効果半減','重量より可動域を優先'],
+    baseball:'背中の引く筋力全般を鍛える。守備での腕の引き・送球時の肩甲骨の安定性を高める。'
+  },
+  'ケーブルフライ':{
+    steps:['ケーブルを肩の高さに設定し両手でハンドルを持つ','肘を軽く曲げた状態を保ちながら弧を描くように両腕を前に閉じる','胸の前でハンドルが合わさった位置で胸筋を最大収縮させ1秒保持','ゆっくりと元の位置に戻し胸のストレッチを感じる'],
+    cues:['「木を抱きしめる」イメージで弧を描く','肘の角度は変えない','最大収縮時に手のひらを重ねると収縮感が増す'],
+    cautions:['肘を曲げすぎるとプレス系になり刺激が変わる','重量を上げすぎると肩関節への負担が増す'],
+    baseball:'胸筋の伸展〜収縮全域での強化。打撃でのインパクト時の押し込み力を高める。'
+  },
+  '懸垂':{
+    steps:['肩幅より少し広めにバーを握り（オーバーハンド）、腕を完全に伸ばしてぶら下がる','肩甲骨を下に引き下げてから肘を体側に向けて引き下ろす','顎がバーを超えるまで引き上げ背中の収縮を感じる','ゆっくりと（2〜3秒かけて）元の位置まで下降する'],
+    cues:['「バーを折り曲げる」イメージで肘を床に向けて引く','肩甲骨の引き下げを先に行ってから引き始める','下降時に広背筋のストレッチを感じながら伸ばす'],
+    cautions:['完全脱力からの急激な引き始めは肩関節を痛める','体を大きく揺らす反動はフォーム崩れの原因'],
+    baseball:'広背筋・大円筋・二頭筋の総合強化。送球時の腕の加速と制球安定性の基礎となる。'
+  },
+  'フェイスプル':{
+    steps:['ケーブルを頭の高さか少し上に設定し、ロープアタッチメントを両手で持つ','足を肩幅に開き体をやや後傾させて構える','肘を肩より高く保ちながらロープの端を耳の横に向けて引く（外旋を意識）','最大外旋位で1秒保持しゆっくり元に戻す'],
+    cues:['引き終わりに「Wの字」を作るイメージ','肘が下がると僧帽筋主体になる。常に肘を上に','外旋（腕を外に回す）動作をメインに意識'],
+    cautions:['重量より回数と外旋動作の質を優先','肩に激痛がある場合は医師に相談','投手は特に毎回欠かさず実施'],
+    baseball:'ローテーターカフ（特に棘下筋・小円筋）の強化。投球後の肩のケアと肩後面の安定性維持に不可欠。'
+  },
+  'バンドEXターナルローテーション':{
+    steps:['バンドを肘の高さに固定し、バンドと反対方向を向いて立つ','肘を90度に曲げ体側に固定（タオルを脇に挟むと安定）','前腕を外側に回転させる（外旋）。この時肘の位置を動かさない','最大外旋位で1〜2秒保持しゆっくり元に戻す'],
+    cues:['肘を脇から離さない。固定が最重要','動作は「ドアを開ける」イメージ','ゆっくりコントロールして行う'],
+    cautions:['重い（強い）バンドは使わない','肩に痛みがある場合は可動域を制限','肘が上がると三角筋が主動筋になり効果が変わる'],
+    baseball:'棘下筋・小円筋の最重要エクササイズ。投手の肩の保護に直結。毎日実施を推奨する最優先ケア種目。'
+  },
+  'Y/T/Wレイズ':{
+    steps:['インクラインベンチに腹ばいになるか立位で前傾する','Y：両腕を斜め上（Y字型）に挙げる。肩甲骨を後ろ上に引き上げる意識','T：両腕を真横（T字型）に挙げる。肩甲骨を内側に絞り込む','W：肘を曲げてWの字を作り肩甲骨を後ろ下に引く（最も重要）'],
+    cues:['肩甲骨の動きを意識する。腕だけを動かさない','極めて軽い重量（または無荷重）で丁寧に行う','各動作の終わりで1〜2秒保持'],
+    cautions:['重量は一切不要。自体重か超軽量で','肩に痛みがある場合は可動域を制限','素早くやらない。収縮の質を優先'],
+    baseball:'肩甲骨周囲筋（僧帽筋・菱形筋・前鋸筋）の総合強化。投球の腕の振り・送球の安定性を高める基礎。'
+  },
+  'スキャプラープルアップ':{
+    steps:['懸垂バーにぶら下がり腕を完全に伸ばした状態でスタート','肘を曲げずに肩甲骨だけを下に引き下げる（体が少し持ち上がる）','最大限引き下げた位置で1〜2秒保持','肩甲骨をゆっくり上げて元の位置に戻る'],
+    cues:['動作は「肩を耳から遠ざける」イメージ','肘は絶対に曲げない','前鋸筋と僧帽筋下部の収縮を感じる'],
+    cautions:['脱力した状態で急にぶら下がると肩関節を傷める','懸垂バーが高すぎる場合は補助を使う'],
+    baseball:'肩甲骨を下制する筋肉（前鋸筋・僧帽筋下部）を強化。投球時の肩甲骨コントロールに直結する。'
+  },
+  'プランク':{
+    steps:['肘を肩の直下につき足を揃えてつま先立ちになる','体を頭から踵まで一直線に保つ','腹部・臀部・体幹全体に力を入れてキープ','フォームが崩れたら即終了'],
+    cues:['お腹だけでなくお尻も硬く絞る','息を止めない。腹圧を保ちながら呼吸','頭を下げず正面を見る'],
+    cautions:['腰が落ちた状態での保持は腰椎への負荷になる','時間を延ばすより姿勢の質を優先'],
+    baseball:'体幹の抗伸展安定性を鍛える。投球・打撃・守備全ての動作で体幹の「ブレない軸」を作る基礎種目。'
+  },
+  'RKCプランク':{
+    steps:['通常のプランク姿勢を作る','肘で床を後ろに引っかく力と足で床を前に押す力を同時に加える','この相反する力で体幹全体に強烈な収縮が生まれる','10〜20秒の短時間保持を複数セット行う'],
+    cues:['肘と足が引き合っているテンションを感じる','通常のプランクより腹筋の収縮が数倍強くなる感覚','頭からつま先まで「鉄の棒」のイメージ'],
+    cautions:['呼吸を止めがち。鼻から細く吐く','時間は短くてよい（10〜20秒）'],
+    baseball:'高強度の体幹収縮で短時間に大きな刺激。試合前のアクティベーションや筋力期の体幹強化に最適。'
+  },
+  'サイドプランク':{
+    steps:['横向きに寝て肘を肩の直下につき、足を重ねる','腰を床から持ち上げ頭から足まで一直線に保つ','腹斜筋と中殿筋に力を入れてキープ','反対側も同様に行う'],
+    cues:['腰が前後に曲がらないよう一直線に','中殿筋（お尻の横）の収縮を意識','肩が耳に近づかないよう肩甲骨を下げる'],
+    cautions:['腰が下に落ちてくるとフォーム崩れ','体重が足りない場合は膝をついて行う'],
+    baseball:'抗側屈安定性を鍛える。打撃のスイング軸の安定・守備での横移動後の姿勢保持に貢献。'
+  },
+  'デッドバグ':{
+    steps:['仰向けに寝て腰をフラットに（床に押しつける）。腕を天井に伸ばし膝を90度に浮かせる','右腕と左脚を同時にゆっくり伸ばし床スレスレで止める（腰は浮かない）','元の位置に戻し反対側（左腕・右脚）を行う','常に腰が床から離れないことが最優先'],
+    cues:['腰と床の間に紙一枚も入らない状態を保つ','動作はゆっくり（3〜4秒かけて伸ばす）','対角の腕と脚を同時に動かす対角協調性を意識'],
+    cautions:['腰が浮いたらそれ以上伸ばさない','膝を伸ばすのが難しければ曲げたまま行う'],
+    baseball:'腰椎の安定性と対角協調性を鍛える。投球動作の力の伝達効率を高める基礎種目。'
+  },
+  'バードドッグ':{
+    steps:['四つん這いになり背中をフラットに保つ（ニュートラルスパイン）','右腕と左脚を同時に床と平行になるまでゆっくり伸ばす','最大伸展位で2秒保持。腰の回転・側屈を防ぐ','ゆっくり元の位置に戻し反対側を行う'],
+    cues:['腕と脚の先端で壁を押すイメージで体を長く伸ばす','腰を回転させない（アンチローテーション）','お腹を絞ることで腰椎を安定させる'],
+    cautions:['腰が落ちる・反れる・回転するなど崩れに注意','骨盤を水平に保つ'],
+    baseball:'投球動作と同じ対角協調パターンを鍛える。腰椎安定性と体幹のアンチローテーション力を養う。'
+  },
+  'パロフプレス':{
+    steps:['ケーブルを胸の高さに設定し、体の横向きで立つ','両手でハンドルを胸の前で保持し足を肩幅に開く','腕を前方に押し出し伸ばした位置で1〜2秒保持','体を回転させずに元の位置に戻す'],
+    cues:['押す動作中に体が回転しないことが目的','胸の前でまず腹圧を高めてから押し出す','ケーブルに引っ張られない様に体幹を固める'],
+    cautions:['ケーブルに引っ張られて体が回転するなら重量を下げる','腰痛がある場合は重量・可動域を大幅に制限'],
+    baseball:'体幹のアンチローテーション能力を鍛える。打撃・投球で「軸がブレない体幹」を作る最重要種目の一つ。'
+  },
+  'ケーブル水平回旋':{
+    steps:['ケーブルを骨盤の高さに設定し体の横向きで立つ','両手でハンドルを持ち打撃のスイング軌道を意識して回旋させる','後ろ足で地面を押し股関節の回旋から始めて胸→腕の順で力を伝える','フォロースルー終点でしっかり止めゆっくり元に戻す'],
+    cues:['地面を踏んでから回す順番を意識する','腕だけで引かない。下半身の回転を先行させる','スイングの軌道をトレースするイメージ'],
+    cautions:['最初は軽い重量から始める','急激な回旋は椎間板への負荷になる'],
+    baseball:'打撃の回旋パワーを直接鍛える最高特異性種目。バットスピード・飛距離向上に直結する。'
+  },
+  'ケーブル対角チョップ':{
+    steps:['ケーブルを高い位置に設定し体の横向きで立つ','両手でハンドルを持ち高い位置から低い位置（対角線）に向けて斬り下ろす','股関節の回旋を使い全身の連動で力を伝える','ゆっくりと元の位置に戻す'],
+    cues:['動作の始まりは股関節と体幹の回旋から','腕は体幹の回旋についてくる感覚','斧で薪を割るイメージで全身連動'],
+    cautions:['軽い重量から始める','肩に痛みがある場合は可動域を制限'],
+    baseball:'高い位置から低い位置への力の伝達を鍛える。投球の腕振り・バッティングのダウンスイング方向の筋力に対応。'
+  },
+  'メディシンボール水平ロータリースロー':{
+    steps:['壁から1〜1.5m離れて横向きに立ち、ボールを両手で持つ','後ろ足で地面を踏み込み股関節→体幹→腕の順で回旋させて壁に投げる','ボールをキャッチし反動を使わずリセット','反対側も同様に行う'],
+    cues:['地面から力を生む下半身主導の投げ方','腕より先に股関節が回旋を開始する','爆発的に素早く投げる'],
+    cautions:['柔らかいバウンド型メディシンボールを使用','肩・肘に痛みがある場合は強度を落とす'],
+    baseball:'投球・打撃に最も近い動作パターンで爆発的回旋力を鍛える。球速アップ・バットスピード向上に直結。'
+  },
+  'メディシンボールスラム':{
+    steps:['両足を肩幅に開き、ボールを両手で頭上に持ち上げる','全身を使って爆発的に真下に向けてボールを叩きつける','お尻を少し後ろに引きながら腕を振り下ろす','バウンドしてきたボールをキャッチして繰り返す'],
+    cues:['全身で地面に叩きつける全身連動を意識','叩きつけた後は自然に前傾姿勢になる','最大速度で振り下ろす'],
+    cautions:['頭上に上げる際に腰を反らしすぎない','足元の安全確認'],
+    baseball:'体幹から末端への力の伝達（キネティックチェーン）を爆発的に鍛える。ピッチングの力の流れと類似した動作。'
+  },
+  'メディシンボール壁投げ':{
+    steps:['壁から1m離れて横向きに立つ','体全体で爆発的にボールを壁に投げる','返ってきたボールをキャッチしてすぐ次の投げに移る','1セット5回、最大努力で投げる'],
+    cues:['速く投げることが最優先。スピードトレーニング','キャッチ→投げのリアクション速度も鍛える','遅くなったらセット終了'],
+    cautions:['コンクリート向けのバウンス型を使う','肩・肘に問題がある場合は強度を落とす'],
+    baseball:'実際の投球・送球に近い爆発的上半身動作を鍛える。球速・送球速度の向上に直結するパワー種目。'
+  },
+  'メディシンボール胸パス':{
+    steps:['壁から1〜1.5m離れて正面向きに立つ','ボールを両手で胸の前に持ち素早く押し出して壁に投げる','返ってきたボールをキャッチしすぐ次の投げに移る','最大速度でのリアクションを意識'],
+    cues:['プッシュではなく爆発的な押し出し','足でも地面を踏んでパスに力を伝える'],
+    cautions:['肩・肘に問題がある場合は力を抑える','疲れたら速度が落ちるので終了'],
+    baseball:'胸→肩の爆発的プッシュ力を鍛える。内野の送球・キャッチャーの返球の力強さに貢献する。'
+  },
+  'ハングパワークリーン':{
+    steps:['膝上のハングポジションからスタート。股関節は前傾し膝は軽く曲げる','股関節を瞬時に伸展させ踵を上げてアンクルエクステンションまで続ける','この三重伸展（股関節・膝・足首）のパワーでバーを引き上げる','バーが最高点に達したら素早く肘を前に回してフロントラックでキャッチ'],
+    cues:['三重伸展が命。股関節→膝→足首の順で力を出す','地面を爆発的に押すイメージ','キャッチは膝を曲げてクッションしながら受ける'],
+    cautions:['テクニカルな種目。最初は軽い重量でフォームを習得','腰が丸まった状態での実施は危険','疲労時はセット数を絞る'],
+    baseball:'全身の爆発的パワーを鍛える最高効率種目。投球速度・打撃の瞬発力・走塁の加速全てに貢献する。'
+  },
+  'ハングパワースナッチ':{
+    steps:['膝上ハングポジションから、スナッチグリップ（肩幅の1.5倍）でバーを持つ','三重伸展で爆発的にバーを引き上げる','バーが頭上に達したら肘を素早く伸ばしてロックアウト。頭上でキャッチ','膝を曲げてクッションしながら受け止める'],
+    cues:['クリーンより高くバーを引き上げる必要がある','バーを体に沿わせて上げる。前に振り出さない'],
+    cautions:['クリーンより難易度が高い。十分な習熟後に実施','肩の柔軟性が必要'],
+    baseball:'ハングクリーンより上半身の爆発的引き上げ動作の貢献が大きい。投球の腕振りに類似したパターンを含む。'
+  },
+  'ボックスジャンプ':{
+    steps:['ボックスから30〜60cm離れて立つ','素早く膝と股関節を曲げて反動をつけ全力で跳び上がる','ボックスの上に静かに両足で着地（クッションしながら）','ボックスから降りてリセット'],
+    cues:['静かに着地することで吸収能力も鍛える','跳ぶ前の溜めは最小限に。素早く切り返す','最大高さより着地の質を優先'],
+    cautions:['疲労時に高いボックスは危険。高さを下げる','着地で膝が内側に入らないよう'],
+    baseball:'下半身の爆発的パワー（RFD）を鍛える。打撃の瞬間的な体重移動・走塁の初速向上に直結。'
+  },
+  'デプスジャンプ':{
+    steps:['20〜30cmの台の端に立ち、そっとステップオフ（飛び降りる）','着地の瞬間（接地時間を最小限に）即座に全力で跳び上がる','地面は熱いイメージで最速のリバウンドジャンプ','着地は両足で。膝を軽くクッションする'],
+    cues:['接地時間ゼロを目指す。長く地面に触れない','腕を振り上げて跳躍の高さを増す'],
+    cautions:['始めは低い台から（20cm以下）','膝・足首に問題がある場合は実施しない','疲労時は実施しない'],
+    baseball:'伸張反射（SSC）を最大化する。打席での体重移動の素早さ・外野手の追い込みでの蹴り出しに直結する。'
+  },
+  'ラテラルバウンド':{
+    steps:['片足で立ち外側の脚で地面を蹴って横方向に跳ぶ','反対の片足で着地しそのまま安定させる（スケータージャンプ）','すぐに同方向または反対方向にバウンドを繰り返す'],
+    cues:['着地した足でしっかり止まる安定性が重要','蹴り出しの角度は低め（45度）で素早く','腕を振って横方向の運動量を増す'],
+    cautions:['膝が内側に入った着地は膝への負荷大','着地フォームが崩れているなら距離を縮める'],
+    baseball:'横方向の爆発的パワーと着地安定性を同時に鍛える。守備での横移動・盗塁のスタート・投球の着地足に直結。'
+  },
+  'ラテラルボックスジャンプ':{
+    steps:['ボックスの横に立ち片足または両足で横方向に跳ぶ','ボックスの上に着地し静かにクッションして止まる','ボックスから降りてリセット'],
+    cues:['着地は静かに。音を立てない着地を目指す','膝の向きをつま先と揃える'],
+    cautions:['ボックスは安定したものを使用','着地で膝が内側に入らないよう'],
+    baseball:'横方向の爆発力と着地制御を同時に鍛える。守備のダッシュ〜ダイビングキャッチ・盗塁阻止の横移動に対応。'
+  },
+  'ジャンプスクワット':{
+    steps:['足を肩幅に開きスクワット姿勢から全力で跳び上がる','最大高さに達したら膝を曲げてクッションしながら着地','着地したら即座に次のジャンプへ移行'],
+    cues:['地面を爆発的に押す感覚','腕を振り上げて跳躍を補助','着地は音を立てない'],
+    cautions:['疲れると着地フォームが崩れる。セット数は少なく','膝に問題がある場合は衝撃を減らす'],
+    baseball:'スクワットの筋力を爆発的なジャンプに変換する。バッティングの爆発的体重移動・走塁の加速に直結する。'
+  },
+  'ジャンプランジ':{
+    steps:['ランジの姿勢（前後に足を開いた状態）から爆発的にジャンプ','空中で前後の足を入れ替え反対側のランジ姿勢で着地','着地したら即座に次のジャンプへ'],
+    cues:['腕を振って高さを増す','着地はつま先から踵の順で衝撃を吸収'],
+    cautions:['着地フォームが崩れたら即中止','膝・足首に問題がある場合は通常ランジで代替'],
+    baseball:'片脚ずつの爆発的な力発揮を鍛える。打撃の踏み込み・走塁中の切り返し動作に直結する。'
+  },
+  'シングルレッグジャンプ':{
+    steps:['片足で立ち膝と股関節を少し曲げて反動をつける','片足で最大努力で真上または前方に跳ぶ','着地は同じ片足で。クッションしながら止まる'],
+    cues:['跳ぶ前の溜めは素早く深くしない','着地した足で完全に固める','踵寄りで着地し膝がつま先より前に出すぎない'],
+    cautions:['着地時の膝内反に注意','疲れると着地フォームが崩れる'],
+    baseball:'片脚の爆発的パワーと着地安定性を同時に鍛える。投球の着地脚・打撃の踏み込み・守備のダッシュ後の着地に直結。'
+  },
+  'ノルディックカール':{
+    steps:['膝立ちになりパートナーまたは固定器具でかかとを固定する','体幹をまっすぐ保ったまま、できる限りゆっくり前方に倒れていく','ハムストリングスで制御しながら限界まで倒れる（または床に手をつく）','腕で反発して素早く元の位置に戻る'],
+    cues:['「ハムが千切れる」ような強烈な伸長収縮を感じる','倒れる速度は最大限ゆっくり（3〜5秒）','体幹をまっすぐ保つ。股関節が曲がらない'],
+    cautions:['非常に強度が高い。最初は補助ありで段階的に導入','ハムストリングスの肉離れ後すぐは避ける','痛みが出たら即中止'],
+    baseball:'肉離れ（ハムストリングス）の予防に最も科学的根拠がある種目。シーズン中も週2回は必ず継続するべき最重要種目。'
+  },
+  'カーフレイズ':{
+    steps:['段差の縁につま先を乗せ、踵を落とした位置からスタート','踵を最大限上げてふくらはぎを完全に収縮させる','最大収縮位で1〜2秒保持','ゆっくり（3〜4秒）踵を下ろしてストレッチ'],
+    cues:['つま先だけで立つ最大収縮を意識','下降はゆっくり。ネガティブで筋肥大刺激'],
+    cautions:['足首に痛みがある場合は可動域を制限','高重量の場合はバランスに注意'],
+    baseball:'足首の底屈筋力を強化。走塁の加速・ピッチングの蹴り出し・守備のステップを支える基礎筋力。'
+  },
+  'カーフジャンプ':{
+    steps:['両足を揃えて立ち、膝をほとんど曲げずに足首だけでジャンプ','接地時間を最短にして連続でリバウンドジャンプ','縄跳びの動きで素早く連続跳び'],
+    cues:['膝は曲げない。足首だけで跳ぶ','地面への接触は最小限','爆発的で素早い足首の動きを意識'],
+    cautions:['足首・アキレス腱に問題がある場合は実施しない','硬い地面でのみ行う（マットは不可）'],
+    baseball:'足首の弾性力（SSC）と腱のバネを鍛える。走塁での接地時間短縮・守備でのフットワーク軽化に直結。'
+  },
+  'ターミナルニーエクステンション':{
+    steps:['バンドを膝の後ろに通し後ろから前方向に引っ張る状態で立つ','膝を軽く曲げた状態（20〜30度）からスタート','バンドの抵抗に逆らいながら膝を完全に伸ばす（終末伸展）','ゆっくり元に戻す'],
+    cues:['膝の「最後の伸ばしきり」に集中','スピードより収縮の質','VMO（膝の内側の筋肉）が収縮する感覚を確認'],
+    cautions:['膝の痛みがある場合は必ず医師に確認','バンドが強すぎると姿勢が崩れる'],
+    baseball:'VMOと膝周囲の安定筋を強化。膝の安定性を高める。守備での低い姿勢保持に重要。'
+  },
+  'ラテラルバンドウォーク':{
+    steps:['バンドを足首または膝の上に巻く','膝を軽く曲げスクワットの浅い姿勢を保つ','横方向にサイドステップを踏む。バンドの抵抗に逆らって歩く','規定回数または距離を往復する'],
+    cues:['バンドが緩まないよう常にテンションを保つ','膝が内側に入らないよう外に向け続ける','上体を揺らさず低い姿勢を一定に保つ'],
+    cautions:['バンドが強すぎると膝内反になりやすい','股関節に痛みがある場合は可動域を制限'],
+    baseball:'中殿筋と股関節外転筋を強化。守備での横移動の安定性・走塁の方向転換・膝の保護に直結する。'
+  },
+  'グルートブリッジ':{
+    steps:['仰向けに寝て膝を90度に曲げる。足裏を地面に完全につける','地面を押して腰を持ち上げ股関節を完全に伸展させる','臀部を強く絞って1〜2秒保持','ゆっくり腰を下ろす'],
+    cues:['ロックアウト時に臀部を絞る','踵寄りで押すとハムと殿筋への刺激が増す','腰を反らさない'],
+    cautions:['腰痛がある場合は可動域を制限','膝が内側に入らないよう'],
+    baseball:'殿筋の基礎的な収縮力を鍛える。ヒップスラストの入門種目。投走打全ての動力源。'
+  },
+  'グルートキックバック':{
+    steps:['四つん這い、またはケーブルを足首に巻いて立つ','膝を曲げたまま後方上方に脚を蹴り上げる','殿筋の最大収縮位で1〜2秒保持','ゆっくり元に戻す'],
+    cues:['殿筋の収縮を意識','腰が反れないよう体幹を固める','お尻で蹴る感覚'],
+    cautions:['腰を反らせすぎると腰椎への負担が増す','脚を高く上げすぎない'],
+    baseball:'殿筋のアイソレーション強化。殿筋の大きな力発揮が難しい選手の補助種目として有効。'
+  },
+  'レッグプレス':{
+    steps:['マシンのシートに座り足をプラットフォームに肩幅で置く','ゆっくりプラットフォームを下ろし（3〜4秒）膝が90度になるまで曲げる','足裏全体で押して膝が完全に伸びる手前まで押し上げる','コントロールしながら下降を繰り返す'],
+    cues:['踵〜つま先の足裏全体で押す','膝を完全に伸ばすとロックが外れ関節への負担になる'],
+    cautions:['重すぎる重量で腰が浮くのは危険'],
+    baseball:'大腿四頭筋の高ボリューム強化に適したマシン種目。バックスクワットの補助として活用。'
+  },
+  'レッグカール':{
+    steps:['マシンに伏せて膝を軽く曲げた状態から始める','ハムストリングスを収縮させて踵をお尻に向けて引き寄せる','最大収縮位で1秒保持','ゆっくり（3〜4秒）元の位置まで下降'],
+    cues:['踵でお尻を蹴るイメージ','下降はゆっくり。ネガティブがハムに効く'],
+    cautions:['肉離れ歴がある選手は軽い重量から','急激な動作は肉離れのリスクがある'],
+    baseball:'ハムストリングスのアイソレーション強化。ノルディックカールと組み合わせることで肉離れ予防効果が高まる。'
+  },
+  'レッグエクステンション':{
+    steps:['マシンに座りパッドが足首の上になる位置に調整する','膝を伸ばしながら足を上げる（完全伸展まで）','最大収縮位で1〜2秒保持','ゆっくり（3〜4秒）下降させる'],
+    cues:['大腿四頭筋の収縮を意識'],
+    cautions:['膝に痛みがある場合は実施しない','全可動域での高重量は膝へのストレスが大きい'],
+    baseball:'大腿四頭筋のアイソレーション強化。スプリントの加速局面・打撃の踏み込みの安定に貢献。'
+  },
+  'スプリットスクワット':{
+    steps:['前後に足を開いて立つ','体をまっすぐ保ちながら真下に下降する','前膝が90度になり後ろ膝が床に近づくまで下げる','前足で押して元の位置に戻る'],
+    cues:['重心は前足の踵寄りに','上体の垂直を保つ'],
+    cautions:['膝の痛みがある場合は可動域を制限'],
+    baseball:'片脚ずつ独立した強化が可能なランジ系種目。左右差の解消と単脚の安定性向上に有効。'
+  },
+  'ラテラルランジ':{
+    steps:['足を広めに開いて立つ','片側に体重を移動させながら横方向にランジ（膝を曲げる）','反対脚は伸ばしたまま','元の位置に戻り反対側も行う'],
+    cues:['股関節を横に折り込む感覚','体重を乗せた方の踵で押して戻る'],
+    cautions:['股関節の柔軟性が必要。硬い場合は可動域を制限'],
+    baseball:'内転筋・股関節外転筋を横方向の動作パターンで鍛える。守備の横移動・走塁の方向転換のベースとなる。'
+  },
+  'シングルレッグRDL':{
+    steps:['片脚で立ち反対の脚を後ろに伸ばしながら上体を前傾させる（T字バランス）','軸脚のハムストリングスに伸長感を感じるまで前傾','元の位置に股関節を前に押して戻る'],
+    cues:['軸脚の踵で床を押す意識','ハムの伸長感が出たらOK。水平まで倒す必要はない'],
+    cautions:['バランスが難しい場合は壁や手すりを使う'],
+    baseball:'片脚でのハムストリングス強化と固有受容感覚を同時に鍛える。着地安定性・投球の着地脚の安定に特に有効。'
+  },
+  'ダンベルショルダープレス':{
+    steps:['ダンベルを肩の高さで持ち座位または立位でスタート','ダンベルを頭上に向けて押し上げる（完全ロックアウト直前まで）','ゆっくり肩の高さまで下降する'],
+    cues:['肘が前に出すぎず横方向に向けて押す','体幹を固めて体が揺れないよう'],
+    cautions:['肩に問題がある選手はグリップや角度を調整','肩の準備運動を必ず行う'],
+    baseball:'三角筋と回旋筋腱板の総合的な強化。送球の力強さ・安定性を高め肩周辺の筋肥大にも貢献する。'
+  },
+  'トライセップスプッシュダウン':{
+    steps:['ケーブルを頭上に設定しロープまたはバーアタッチメントを持つ','肘を体側に固定して（動かさない）肘を完全伸展させて押し下げる','収縮位で1秒保持、ゆっくり上げて三頭筋をストレッチ'],
+    cues:['肘の位置を変えない（脇を締める）','ロープの場合は下で広げると収縮感が増す'],
+    cautions:['肘の痛みがある場合は重量を下げる'],
+    baseball:'三頭筋の強化はベンチプレス・ショルダープレスの重量増加を助け投球時の肘の安定性にも貢献する。'
+  },
+  'トライセップスキックバック':{
+    steps:['片手をベンチについて前傾し肘を90度に曲げた状態からスタート','肘を固定したまま前腕だけを後方に伸ばしていく','完全伸展位で1〜2秒収縮させる','ゆっくり元に戻す'],
+    cues:['肘の位置は動かさない。体側に固定','完全伸展での収縮を意識'],
+    cautions:['肘の痛みがある場合は即中止'],
+    baseball:'三頭筋のアイソレーション強化。投球時の肘の伸展動作（加速局面の仕上げ）に直接対応する種目。'
+  },
+  'ディップス':{
+    steps:['ディップスバーに両手をつき腕を伸ばして体を支える','肘を後ろに向け胸を少し前傾させながら肘を曲げて下降','上腕が床と平行になるか肩の柔軟性の範囲で下降','腕を伸ばして元の位置へ'],
+    cues:['肘を体の後ろに引くと三頭筋主体になる','体を前傾させると胸主体になる'],
+    cautions:['肩に問題がある選手は無理な深さに下りない'],
+    baseball:'体重を超えた上半身の押し出し力を鍛える複合種目。打撃の押し込み・守備のタッグ動作に貢献。'
+  },
+  'フロントスクワット':{
+    steps:['バーを鎖骨の上（フロントラック）に乗せ、肘を前方に高く上げる','足を肩幅に開きつま先は30度程度外向き','肘を高く保ちながら深くしゃがみ込む','腹圧を高めて垂直に立ち上がる'],
+    cues:['肘を前に高く保つことが命。下がるとバーが落ちる'],
+    cautions:['手首の柔軟性が必要。ストラップを使っても可'],
+    baseball:'体幹の直立性と股関節の深い可動域を鍛える。投球フォームの「丸まらない」体幹姿勢の強化に有効。'
+  },
+  'バーベルシュラッグ':{
+    steps:['肩幅でバーを持って直立する','肩を耳に向けてすくめ上げる','最大収縮位で1〜2秒保持','ゆっくり下ろす'],
+    cues:['肩を耳につける最大収縮','回転動作は加えない'],
+    cautions:['過度の重量は首・腰への負担になる'],
+    baseball:'僧帽筋上部・肩甲挙筋の強化。重い用具を持つ体力・肩甲骨のアップワードローテーションに貢献。'
+  },
+  'デプスプッシュアップ':{
+    steps:['両手をやや高い台（10〜15cm）に置いてプッシュアップの姿勢を作る','台から手を浮かせて一瞬フリーにし床に着地する','着地と同時に即座に押し上げて台に戻る','接地時間を最短にする'],
+    cues:['地面が熱いイメージで最速リバウンド','腕のSSCを鍛える'],
+    cautions:['初めはごく低い台から','手首に問題がある場合は実施しない'],
+    baseball:'上半身のSSCと爆発的プッシュ力を鍛える。投球加速局面・打撃インパクトの瞬間的な力発揮に対応。'
+  },
+  'パロフプレスジャーク':{
+    steps:['パロフプレスの通常ポジションから構える','体幹を固め腕を前に爆発的に押し出す','押し出した位置で瞬間的に静止してから戻る','体の回転ゼロを保つことが最重要'],
+    cues:['止める動作が体幹の爆発的安定を鍛える','押し出しを最大速度で行う'],
+    cautions:['重量より動作の速さを優先'],
+    baseball:'体幹の爆発的アンチローテーション力を鍛える。打撃の軸の安定・投球の加速時の体幹固定に直結する。'
+  },
+  'フォームローラー':{
+    steps:['ローラーをほぐしたい筋肉の下に置き体重を乗せてゆっくり転がす','痛みや硬さを感じる部位で10〜20秒停止して圧をかける','各部位を30秒〜1分ほぐす（胸椎・広背筋・殿筋・ハムなど）'],
+    cues:['痛みが強い場所は体重を少し抜く','呼吸を止めない。ゆっくり深呼吸しながら行う'],
+    cautions:['急性の炎症・腫れがある部位には行わない','腰椎に直接ローラーをかけない'],
+    baseball:'筋膜リリースと可動域の確保。毎日実施することで可動域低下を防ぎ練習・試合のパフォーマンスを維持する。'
+  },
+  '守備ドリル':{
+    steps:['コーンやラダーを配置して守備の動作をトレーニング','ゴロへの反応→一歩目の方向付け→フットワーク→スロー動作の順でドリルを設定','実際のポジションに近い動作パターンで行う','最大強度・最高速度で実施'],
+    cues:['一歩目の速さと正確な方向付けを意識','重心を低く保ちながらフットワーク'],
+    cautions:['疲れすぎた状態での実施は怪我のリスク','足首・膝のテーピングを適切に行う'],
+    baseball:'守備特異的な動作パターンを高強度で反復。ウェイトで鍛えた筋力を実際の守備動作に変換する最重要ドリル。'
+  },
+  '横向きスプリント折り返し':{
+    steps:['5m離れた2点間にコーンを置く','横向きのサイドステップで素早く移動しコーンでタッチして折り返す','クロスステップを交えながら最大速度で往復する'],
+    cues:['重心を低く保つ','折り返しの切り返しを素早く'],
+    cautions:['足首・膝に問題がある場合は強度を落とす','床面のグリップを確認する'],
+    baseball:'守備の横方向への素早い移動と切り返し能力を直接鍛える。内外野の横の守備範囲拡大に最も効果的な種目。'
+  },
+  'ゼロポジションEXターナルローテーション':{
+    steps:['バンドを肩の高さに固定し腕を肩の延長線上（90〜110度）に挙げる','肘を90度に曲げ前腕が地面と平行になる位置がスタート','前腕を上方向に回転させる（外旋）。肘の高さは変えない','ゆっくりと元の位置に戻す'],
+    cues:['腕をゼロポジション（肩甲骨の延長線上）に置く','肘を肩の高さに保ち続ける'],
+    cautions:['バンドは非常に軽いものを使用する','痛みが出る角度を避けて可動域を調整する'],
+    baseball:'投球フォームに最も近い角度でのローテーターカフ強化。投手・捕手の肩保護に特に有効。'
+  },
+  'ヒップフレクサーストレッチ':{
+    steps:['片膝をついてランジ姿勢をとる（後ろ膝が床）','後ろ脚の股関節前面を前方向に押し出すように体を前傾させる','骨盤を後傾させる（お尻を締める）と効果が増す','30〜60秒保持して反対側も行う'],
+    cues:['後ろ脚の付け根を床に向かって押すイメージ','体を前に倒すのでなく骨盤を前に送る'],
+    cautions:['強い痛みが出る場合は可動域を制限','膝が痛い場合はマットを膝の下に置く'],
+    baseball:'股関節屈筋の柔軟性改善。投球の踏み込み幅の拡大・打撃の体重移動の可動域向上に貢献。'
+  },
+  'バックスクワット（スピード）':{
+    steps:['55〜65%1RMの軽い重量を使用','通常のスクワットフォームで構える','下降は制御しながら（2〜3秒）、挙上は最大速度で爆発的に押し上げる','スピードの質を保てる重量・回数に留める'],
+    cues:['下から弾き返す爆発的な挙上を意識','神経系に速く動かす刺激を入れるのが目的'],
+    cautions:['重量を上げすぎると動作速度が落ちて目的と外れる'],
+    baseball:'スクワットのパワーを爆発的に発揮する神経系の適応を促す。打撃の瞬発的体重移動に直結するスピードトレーニング。'
+  },
+  'ベンチプレス（スピード）':{
+    steps:['55〜65%1RMを使用','胸にタッチした瞬間から最大速度で押し上げる','セット中は常に最大速度を意識'],
+    cues:['バーが離れていくほど速く押す意識','疲れて遅くなったらセット終了'],
+    cautions:['重量を上げすぎない（速度が命）'],
+    baseball:'上半身プッシュ力の爆発的発揮を鍛える。投球リリース・打球の瞬間的押し込みに対応するスピード種目。'
+  }
+};
+
+// 種目名から詳細DBのキーを取得（括弧内バリエーションを除去してマッチング）
+function getExKey(name) {
+  if (EX_DB[name]) return name;
+  const base = name.replace(/（[^）]*）/g,'').replace(/\s*追加$/,'').replace(/片足$/,'').trim();
+  if (EX_DB[base]) return base;
+  for (const key of Object.keys(EX_DB)) {
+    if (name.startsWith(key) || base === key) return key;
+  }
+  // 部分一致（短いキー優先）
+  const candidates = Object.keys(EX_DB).filter(k => base.includes(k) || k.includes(base));
+  if (candidates.length) return candidates.sort((a,b)=>b.length-a.length)[0];
+  return null;
+}
+
+// ── 種目詳細モーダル ──────────────────────────────
+function showDetail(name) {
+  const modal = document.getElementById('detail-modal');
+  const title = document.getElementById('detail-title');
+  const body  = document.getElementById('detail-body');
+
+  title.textContent = name;
+
+  const key = getExKey(name);
+  if (key && EX_DB[key]) {
+    const d = EX_DB[key];
+    body.innerHTML = `
+      <div class="detail-section">
+        <div class="detail-sh">📋 やり方</div>
+        <ol class="detail-ol">${d.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+      </div>
+      <div class="detail-section">
+        <div class="detail-sh">🎯 動作の意識</div>
+        <ul class="detail-ul">${d.cues.map(c=>`<li>${c}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-section">
+        <div class="detail-sh">⚠️ 注意点</div>
+        <ul class="detail-ul caution">${d.cautions.map(c=>`<li>${c}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-baseball">
+        <span class="detail-sh" style="display:inline;font-size:11px;">⚾ 野球への活かし方</span><br>
+        <span>${d.baseball}</span>
+      </div>
+    `;
+  } else {
+    body.innerHTML = `<div style="color:#888;padding:16px 0;font-size:13px;">この種目の詳細データは準備中です。<br>野球特化ポイントを参考にしてください。</div>`;
+  }
+
+  modal.classList.add('open');
+  document.getElementById('detail-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal').classList.remove('open');
+  document.getElementById('detail-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+</script>
+
+<!-- 詳細モーダル -->
+<div id="detail-overlay" onclick="closeDetail()"></div>
+<div id="detail-modal">
+  <div class="detail-head">
+    <div id="detail-title" class="detail-title"></div>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div id="detail-body" class="detail-body"></div>
+</div>
+
+<style>
+/* ── 種目行タップ ── */
+.ex-row{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.ex-row:active td{background:rgba(192,57,43,.1);}
+.ex-tap{font-size:10px;color:var(--red);margin-left:4px;opacity:.8;}
+
+/* ── オーバーレイ ── */
+#detail-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;
+  backdrop-filter:blur(3px);
+}
+
+/* ── ポップアップモーダル ── */
+#detail-modal{
+  display:none;
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(.94);
+  width:min(92vw, 520px);
+  max-height:80vh;
+  background:#1a1a1a;
+  border:1px solid var(--border);
+  border-top:3px solid var(--red);
+  border-radius:4px;
+  z-index:101;
+  flex-direction:column;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity .22s ease, transform .22s ease;
+}
+#detail-modal.open{
+  display:flex;
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+.detail-head{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.detail-title{
+  font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;
+  color:var(--white);flex:1;line-height:1.2;
+}
+.detail-close{
+  background:none;border:1px solid #444;color:#aaa;
+  width:30px;height:30px;border-radius:50%;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.detail-body{
+  overflow-y:auto;padding:14px 16px 20px;
+  -webkit-overflow-scrolling:touch;
+}
+
+.detail-section{margin-bottom:14px;}
+.detail-sh{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:7px;display:block;}
+.detail-ol,.detail-ul{padding-left:18px;color:#ccc;font-size:13px;line-height:1.8;}
+.detail-ol li,.detail-ul li{margin-bottom:3px;}
+.detail-ul.caution li{color:#e8a87c;}
+.detail-baseball{background:rgba(192,57,43,.1);border-left:3px solid var(--red);padding:11px 13px;font-size:13px;color:#ccc;line-height:1.75;margin-top:4px;}
+</style>
+
+</body>
+</html>
